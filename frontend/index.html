@@ -3,39 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Where Is My Train - Clone</title>
+    <title>Where Is My Train</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
+    <header class="app-header">
         <h1>🚆 Where Is My Train</h1>
+        <div class="theme-selector">
+            <label for="themeSelect">Theme:</label>
+            <select id="themeSelect" onchange="changeTheme(this.value)">
+                <option value="light">Light Mode</option>
+                <option value="dark">Dark Mode</option>
+            </select>
+        </div>
     </header>
 
     <main class="container">
-        <!-- Navigation Tabs -->
+        <!-- Tab Controls -->
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('spot')">Spot Train</button>
             <button class="tab-btn" onclick="switchTab('between')">Between Stations</button>
         </div>
 
-        <!-- Tab 1: Spot Train Search -->
+        <!-- Spot Train Input -->
         <section id="spot-tab" class="tab-content active">
             <div class="search-box">
-                <input type="text" id="trainQuery" placeholder="Enter Train Number or Name (e.g., 12626 or Kerala)">
-                <button onclick="searchTrain()">Search</button>
+                <input type="text" id="trainQuery" placeholder="Enter Train No. or Name (e.g., 12626)">
+                <button onclick="searchTrain()">Locate</button>
             </div>
-            <div id="spotResults" class="results-container"></div>
         </section>
 
-        <!-- Tab 2: Between Stations Search -->
+        <!-- Between Stations Input -->
         <section id="between-tab" class="tab-content">
             <div class="search-box">
-                <input type="text" id="fromStation" placeholder="From Station Code (e.g., NDLS)">
-                <input type="text" id="toStation" placeholder="To Station Code (e.g., TVC)">
+                <input type="text" id="fromStation" placeholder="From (e.g., NDLS)">
+                <input type="text" id="toStation" placeholder="To (e.g., TVC)">
                 <button onclick="searchBetweenStations()">Find Trains</button>
             </div>
-            <div id="betweenResults" class="results-container"></div>
         </section>
+
+        <!-- Live Route Container -->
+        <div id="trackingContainer" class="tracking-view hidden">
+            <!-- Populated via JS -->
+        </div>
     </main>
 
     <script src="script.js"></script>
