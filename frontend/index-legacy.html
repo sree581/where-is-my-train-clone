@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Where Is My Train - Clone</title>
+    <title>Where Is My Train - Legacy Interface</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
+    <header class="app-header">
         <h1>🚆 Where Is My Train</h1>
+        <div class="theme-selector">
+            <label for="themeSelect">Theme:</label>
+            <select id="themeSelect" onchange="changeTheme(this.value)">
+                <option value="light">Light Mode</option>
+                <option value="dark">Dark Mode</option>
+            </select>
+        </div>
     </header>
 
     <main class="container">
@@ -36,6 +43,11 @@
             </div>
             <div id="betweenResults" class="results-container"></div>
         </section>
+
+        <!-- Live Route Container -->
+        <div id="trackingContainer" class="tracking-view hidden">
+            <!-- Populated via JS -->
+        </div>
     </main>
 
     <script src="script.js"></script>

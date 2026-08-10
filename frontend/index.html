@@ -3,134 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Where Is My Train</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header class="app-header">
-        <h1>🚆 Where Is My Train</h1>
-        <div class="theme-selector">
-            <label for="themeSelect">Theme:</label>
-            <select id="themeSelect" onchange="changeTheme(this.value)">
-                <option value="light">Light Mode</option>
-                <option value="dark">Dark Mode</option>
-            </select>
-        </div>
-    </header>
-
-    <main class="container">
-        <!-- Tab Controls -->
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('spot')">Spot Train</button>
-            <button class="tab-btn" onclick="switchTab('between')">Between Stations</button>
-        </div>
-
-        <!-- Spot Train Input -->
-        <section id="spot-tab" class="tab-content active">
-            <div class="search-box">
-                <input type="text" id="trainQuery" placeholder="Enter Train No. or Name (e.g., 12626)">
-                <button onclick="searchTrain()">Locate</button>
-            </div>
-        </section>
-
-        <!-- Between Stations Input -->
-        <section id="between-tab" class="tab-content">
-            <div class="search-box">
-                <input type="text" id="fromStation" placeholder="From (e.g., NDLS)">
-                <input type="text" id="toStation" placeholder="To (e.g., TVC)">
-                <button onclick="searchBetweenStations()">Find Trains</button>
-            </div>
-        </section>
-
-        <!-- Live Route Container -->
-        <div id="trackingContainer" class="tracking-view hidden">
-            <!-- Populated via JS -->
-        </div>
-    </main>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Where Is My Train — Track live train status, find trains between stations, and check PNR status in real-time across 8,000+ Indian Railway stations.">
-  <title>Where Is My Train — Live Train Tracking</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/home.css">
+    <meta name="description" content="Where Is My Train — Track live train status, find trains between stations, and check PNR status in real-time across 8,000+ Indian Railway stations.">
+    <title>Where Is My Train — Live Train Tracking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ===== Header ===== -->
-  <header class="site-header" id="site-header">
-    <div class="header-inner">
-      <a href="index.html" class="logo" aria-label="Where Is My Train Home">
-        <span class="logo-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/><circle cx="8" cy="7" r="1" fill="#fff" stroke="none"/><circle cx="16" cy="7" r="1" fill="#fff" stroke="none"/></svg>
-        </span>
-        Where is my Train
-      </a>
+  <!-- Header -->
+<header class="app-header">
+  <h1>🚆 Where Is My Train</h1>
 
-      <div class="header-actions">
-        <button class="lang-select" aria-label="Language selector">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg>
-          EN
-        </button>
-        <button class="header-icon-btn" aria-label="Settings">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
-        <button class="header-icon-btn" aria-label="Notifications">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        </button>
-        <button class="header-icon-btn mobile-menu-btn" id="mobile-menu-open" aria-label="Open menu">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
-      </div>
-    </div>
-  </header>
+  <div class="header-actions" style="margin-left: auto; display: flex; align-items: center; gap: 12px;">
+    <!-- Helpdesk Icon Button -->
+    <a href="helpdesk.html" class="header-icon-btn" aria-label="Help Desk" title="Help Desk" style="color: #ffffff; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    </a>
+  </div>
+</header>
 
-  <!-- ===== Search Section ===== -->
+  <!-- Search Section -->
   <section class="search-section" id="search-section" aria-label="Train Search">
-    <!-- Tabs -->
     <div class="search-tabs" role="tablist">
       <button class="search-tab active" data-tab="find-trains" role="tab" aria-selected="true" id="tab-find-trains">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
-        Find Trains
+        Search Train
       </button>
       <button class="search-tab" data-tab="pnr-status" role="tab" aria-selected="false" id="tab-pnr-status">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         PNR Status
       </button>
+      <button class="search-tab" data-tab="coach-position" role="tab" aria-selected="false" id="tab-coach-position">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><circle cx="6" cy="18" r="1"/><circle cx="18" cy="18" r="1"/></svg>
+        Coach Position
+      </button>
     </div>
 
-    <!-- Find Trains Form -->
+    <!-- Search Train Form (Redirects to index-legacy.html) -->
     <div class="search-form active" id="find-trains-form" role="tabpanel" aria-labelledby="tab-find-trains">
-      <div class="station-inputs">
-        <div class="input-group">
-          <label for="from-station">From</label>
-          <div class="input-wrapper" style="position:relative">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="4 3"/></svg>
-            <input type="text" id="from-station" class="station-autocomplete" placeholder="Select departure station" autocomplete="off" aria-label="Departure station">
-            <div class="autocomplete-dropdown" role="listbox"></div>
-          </div>
-        </div>
-
-        <button class="swap-btn" id="swap-stations" aria-label="Swap stations" title="Swap stations">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
-        </button>
-
-        <div class="input-group">
-          <label for="to-station">To</label>
-          <div class="input-wrapper" style="position:relative">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="4 3"/></svg>
-            <input type="text" id="to-station" class="station-autocomplete" placeholder="Select destination station" autocomplete="off" aria-label="Destination station">
-            <div class="autocomplete-dropdown" role="listbox"></div>
-          </div>
-        </div>
-
-        <button class="search-btn" id="find-trains-btn" aria-label="Search trains">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Search
-        </button>
+      <div class="redirect-action-container" style="text-align: center; padding: 20px 0;">
+        <a href="index-legacy.html" class="search-btn" id="find-trains-btn" style="display: inline-flex; text-decoration: none; align-items: center; justify-content: center; width: 100%; max-width: 320px; text-align: center;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right: 8px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Search Live Trains
+        </a>
       </div>
-      <div class="search-results-panel" id="find-trains-results" aria-live="polite"></div>
     </div>
 
     <!-- PNR Status Form -->
@@ -150,12 +73,20 @@
       </div>
       <div class="search-results-panel" id="pnr-results" aria-live="polite"></div>
     </div>
+
+    <!-- Coach Position Form (Redirects to coach.html) -->
+    <div class="search-form" id="coach-position-form" role="tabpanel" aria-labelledby="tab-coach-position">
+      <div class="redirect-action-container" style="text-align: center; padding: 20px 0;">
+        <a href="coach.html" class="search-btn" id="coach-position-btn" style="display: inline-flex; text-decoration: none; align-items: center; justify-content: center; width: 100%; max-width: 320px; text-align: center;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right: 8px;"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/></svg>
+          View Coach & Seat Layout
+        </a>
+      </div>
+    </div>
   </section>
 
-  <!-- ===== Page Content ===== -->
+  <!-- Page Content -->
   <div class="page-content">
-
-    <!-- How It Works -->
     <article class="how-section" id="how-it-works">
       <div class="section-header">
         <div class="section-icon blue">
@@ -167,7 +98,6 @@
       <p>Ever asked yourself, <strong>Where is my train right now?</strong> Whether you're planning a journey, tracking a loved one's travel, or waiting to board, knowing your train's exact location is crucial. That's where <a href="#">whereismytrain.live</a> comes in — a simple yet powerful platform to check live train running status in real-time.</p>
     </article>
 
-    <!-- Why Passengers Love Train Status -->
     <section class="benefits-section" id="benefits">
       <div class="section-header">
         <div class="section-icon blue">
@@ -207,7 +137,6 @@
       </div>
     </section>
 
-    <!-- The Bigger Impact -->
     <section class="impact-section" id="impact">
       <div class="section-header">
         <div class="section-icon green">
@@ -267,7 +196,6 @@
       </div>
     </section>
 
-    <!-- India's Journey Banner -->
     <div class="smart-banner" id="smart-banner">
       <div class="section-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
@@ -279,25 +207,25 @@
     </div>
   </div>
 
-  <!-- ===== Footer ===== -->
+  <!-- Footer -->
   <footer class="site-footer" id="site-footer">
     <div class="footer-inner">
       <div class="footer-grid">
         <div class="footer-brand">
           <a href="index.html" class="logo">
-            <span class="logo-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
+            <span class="logo-icon" style="font-size: 1.5rem; display: inline-flex; align-items: center; margin-right: 6px;">
+              🚆
             </span>
-            Where is my Train
+            Where Is My Train
           </a>
           <p>Track your train in real-time across 8,000+ Indian Railway stations. Fast, reliable, and always free.</p>
         </div>
         <div class="footer-col">
           <h4>Features</h4>
           <ul>
-            <li><a href="#">Live Train Status</a></li>
+            <li><a href="index-legacy.html">Live Train Status</a></li>
             <li><a href="#">PNR Status</a></li>
-            <li><a href="#">Train Schedule</a></li>
+            <li><a href="coach.html">Coach Position & Layout</a></li>
             <li><a href="#">Train Route</a></li>
           </ul>
         </div>
@@ -320,7 +248,7 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <span>&copy; 2025 Where Is My Train. All rights reserved.</span>
+        <span>&copy; 2026 Where Is My Train. All rights reserved.</span>
         <div class="footer-bottom-links">
           <a href="#">Privacy</a>
           <a href="#">Terms</a>
@@ -329,36 +257,6 @@
       </div>
     </div>
   </footer>
-
-  <!-- ===== Floating Bar ===== -->
-  <div class="floating-bar" id="floating-bar">
-    <button class="floating-close" id="floating-close" aria-label="Close floating bar">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
-    <button class="live-map-btn" id="live-map-btn" aria-label="Open live train map">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
-      Live train map
-    </button>
-  </div>
-
-  <!-- ===== Mobile Navigation ===== -->
-  <div class="mobile-nav-overlay" id="mobile-nav" aria-hidden="true">
-    <nav class="mobile-nav-panel" aria-label="Mobile Navigation">
-      <div class="mobile-nav-close">
-        <button id="mobile-nav-close" aria-label="Close navigation">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <ul class="mobile-nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="#">Live Train Status</a></li>
-        <li><a href="#">PNR Status</a></li>
-        <li><a href="#">Train Schedule</a></li>
-        <li><a href="helpdesk.html">Help Desk</a></li>
-        <li><a href="#">About</a></li>
-      </ul>
-    </nav>
-  </div>
 
   <script src="js/home.js"></script>
 </body>
