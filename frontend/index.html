@@ -47,7 +47,319 @@
             <!-- Populated via JS -->
         </div>
     </main>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Where Is My Train — Track live train status, find trains between stations, and check PNR status in real-time across 8,000+ Indian Railway stations.">
+  <title>Where Is My Train — Live Train Tracking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
 
-    <script src="script.js"></script>
+  <!-- ===== Header ===== -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="logo" aria-label="Where Is My Train Home">
+        <span class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/><circle cx="8" cy="7" r="1" fill="#fff" stroke="none"/><circle cx="16" cy="7" r="1" fill="#fff" stroke="none"/></svg>
+        </span>
+        Where is my Train
+      </a>
+
+      <div class="header-actions">
+        <button class="lang-select" aria-label="Language selector">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg>
+          EN
+        </button>
+        <button class="header-icon-btn" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="header-icon-btn" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <button class="header-icon-btn mobile-menu-btn" id="mobile-menu-open" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Search Section ===== -->
+  <section class="search-section" id="search-section" aria-label="Train Search">
+    <!-- Tabs -->
+    <div class="search-tabs" role="tablist">
+      <button class="search-tab active" data-tab="find-trains" role="tab" aria-selected="true" id="tab-find-trains">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
+        Find Trains
+      </button>
+      <button class="search-tab" data-tab="pnr-status" role="tab" aria-selected="false" id="tab-pnr-status">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        PNR Status
+      </button>
+    </div>
+
+    <!-- Find Trains Form -->
+    <div class="search-form active" id="find-trains-form" role="tabpanel" aria-labelledby="tab-find-trains">
+      <div class="station-inputs">
+        <div class="input-group">
+          <label for="from-station">From</label>
+          <div class="input-wrapper" style="position:relative">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="4 3"/></svg>
+            <input type="text" id="from-station" class="station-autocomplete" placeholder="Select departure station" autocomplete="off" aria-label="Departure station">
+            <div class="autocomplete-dropdown" role="listbox"></div>
+          </div>
+        </div>
+
+        <button class="swap-btn" id="swap-stations" aria-label="Swap stations" title="Swap stations">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+        </button>
+
+        <div class="input-group">
+          <label for="to-station">To</label>
+          <div class="input-wrapper" style="position:relative">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="4 3"/></svg>
+            <input type="text" id="to-station" class="station-autocomplete" placeholder="Select destination station" autocomplete="off" aria-label="Destination station">
+            <div class="autocomplete-dropdown" role="listbox"></div>
+          </div>
+        </div>
+
+        <button class="search-btn" id="find-trains-btn" aria-label="Search trains">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Search
+        </button>
+      </div>
+      <div class="search-results-panel" id="find-trains-results" aria-live="polite"></div>
+    </div>
+
+    <!-- PNR Status Form -->
+    <div class="search-form" id="pnr-status-form" role="tabpanel" aria-labelledby="tab-pnr-status">
+      <div class="pnr-input-row">
+        <div class="input-group">
+          <label for="pnr-input">PNR Number</label>
+          <div class="input-wrapper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <input type="text" id="pnr-input" placeholder="Enter 10-digit PNR number" maxlength="10" aria-label="PNR Number">
+          </div>
+        </div>
+        <button class="search-btn" id="pnr-search-btn" aria-label="Check PNR status">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Search
+        </button>
+      </div>
+      <div class="search-results-panel" id="pnr-results" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ===== Page Content ===== -->
+  <div class="page-content">
+
+    <!-- How It Works -->
+    <article class="how-section" id="how-it-works">
+      <div class="section-header">
+        <div class="section-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        </div>
+        <h2>How Where Is My Train Works – Your Complete Railway Companion</h2>
+      </div>
+      <p>Where is My Train is an online tool that lets you track your live train status without any complex process. This tracker shows you exactly where the train is on the map, how much distance it has covered, expected delays, and other platform numbers — all in one place. Our intelligent search system connects you to real-time data from Indian Railways, covering 12,000+ trains across 8,000+ railway stations.</p>
+      <p>Ever asked yourself, <strong>Where is my train right now?</strong> Whether you're planning a journey, tracking a loved one's travel, or waiting to board, knowing your train's exact location is crucial. That's where <a href="#">whereismytrain.live</a> comes in — a simple yet powerful platform to check live train running status in real-time.</p>
+    </article>
+
+    <!-- Why Passengers Love Train Status -->
+    <section class="benefits-section" id="benefits">
+      <div class="section-header">
+        <div class="section-icon blue">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </div>
+        <h2>Why Passengers Love Train Status?</h2>
+      </div>
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h4>Saves Time</h4>
+          <p>Avoid unnecessary waiting at platforms.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <h4>Reduces Anxiety</h4>
+          <p>Stay updated and travel with peace of mind.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <h4>Better Planning</h4>
+          <p>Plan your journey better with real-time data.</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h4>Everyone Can Use</h4>
+          <p>Perfect for daily commuters, tourists, families &amp; more.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- The Bigger Impact -->
+    <section class="impact-section" id="impact">
+      <div class="section-header">
+        <div class="section-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h2>The Bigger Impact</h2>
+      </div>
+      <div class="impact-grid">
+        <a href="#" class="impact-card">
+          <div class="impact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+          </div>
+          <div class="impact-text">
+            <h4>Less Crowd at Stations</h4>
+            <p>Passengers reach only when needed.</p>
+          </div>
+          <span class="impact-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </a>
+        <a href="#" class="impact-card">
+          <div class="impact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="impact-text">
+            <h4>Better Punctuality Awareness</h4>
+            <p>Helps passengers adjust their plans.</p>
+          </div>
+          <span class="impact-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </a>
+        <a href="#" class="impact-card">
+          <div class="impact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <div class="impact-text">
+            <h4>Digital Inclusion</h4>
+            <p>Helps people in small towns too.</p>
+          </div>
+          <span class="impact-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </a>
+        <a href="#" class="impact-card">
+          <div class="impact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
+          </div>
+          <div class="impact-text">
+            <h4>Smarter Rail Travel</h4>
+            <p>Contributes to a better travel ecosystem.</p>
+          </div>
+          <span class="impact-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </a>
+      </div>
+    </section>
+
+    <!-- India's Journey Banner -->
+    <div class="smart-banner" id="smart-banner">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
+      </div>
+      <div>
+        <h3>India's Journey, Now Smarter</h3>
+        <p>With real-time tracking, digital upgrades, and intelligent tools, train travel in India is becoming more reliable, transparent, and passenger-friendly every day.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer" id="site-footer">
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo">
+            <span class="logo-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
+            </span>
+            Where is my Train
+          </a>
+          <p>Track your train in real-time across 8,000+ Indian Railway stations. Fast, reliable, and always free.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Features</h4>
+          <ul>
+            <li><a href="#">Live Train Status</a></li>
+            <li><a href="#">PNR Status</a></li>
+            <li><a href="#">Train Schedule</a></li>
+            <li><a href="#">Train Route</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="helpdesk.html">Help Desk</a></li>
+            <li><a href="#">Blog</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Disclaimer</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2025 Where Is My Train. All rights reserved.</span>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Sitemap</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== Floating Bar ===== -->
+  <div class="floating-bar" id="floating-bar">
+    <button class="floating-close" id="floating-close" aria-label="Close floating bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <button class="live-map-btn" id="live-map-btn" aria-label="Open live train map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
+      Live train map
+    </button>
+  </div>
+
+  <!-- ===== Mobile Navigation ===== -->
+  <div class="mobile-nav-overlay" id="mobile-nav" aria-hidden="true">
+    <nav class="mobile-nav-panel" aria-label="Mobile Navigation">
+      <div class="mobile-nav-close">
+        <button id="mobile-nav-close" aria-label="Close navigation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <ul class="mobile-nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="#">Live Train Status</a></li>
+        <li><a href="#">PNR Status</a></li>
+        <li><a href="#">Train Schedule</a></li>
+        <li><a href="helpdesk.html">Help Desk</a></li>
+        <li><a href="#">About</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <script src="js/home.js"></script>
 </body>
 </html>
