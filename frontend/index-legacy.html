@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Where Is My Train - Clone</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🚆 Where Is My Train</h1>
+    </header>
+
+    <main class="container">
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('spot')">Spot Train</button>
+            <button class="tab-btn" onclick="switchTab('between')">Between Stations</button>
+        </div>
+
+        <!-- Tab 1: Spot Train Search -->
+        <section id="spot-tab" class="tab-content active">
+            <div class="search-box">
+                <input type="text" id="trainQuery" placeholder="Enter Train Number or Name (e.g., 12626 or Kerala)">
+                <button onclick="searchTrain()">Search</button>
+            </div>
+            <div id="spotResults" class="results-container"></div>
+        </section>
+
+        <!-- Tab 2: Between Stations Search -->
+        <section id="between-tab" class="tab-content">
+            <div class="search-box">
+                <input type="text" id="fromStation" placeholder="From Station Code (e.g., NDLS)">
+                <input type="text" id="toStation" placeholder="To Station Code (e.g., TVC)">
+                <button onclick="searchBetweenStations()">Find Trains</button>
+            </div>
+            <div id="betweenResults" class="results-container"></div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
