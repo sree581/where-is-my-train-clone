@@ -1,3 +1,17 @@
+// Get train details from URL
+const params = new URLSearchParams(window.location.search);
+
+const trainNumber = params.get("trainNumber");
+const trainName = params.get("trainName");
+
+const trainTitle = document.getElementById("train-title");
+
+if (trainNumber && trainName) {
+    trainTitle.textContent = `${trainNumber} - ${trainName}`;
+} else {
+    trainTitle.textContent = "Train details unavailable";
+}
+
 const coaches = [
     {
         name: "GEN",
