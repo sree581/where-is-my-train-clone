@@ -1,126 +1,30 @@
-const coaches = [
-    {
-        name: "GEN",
-        type: "General",
-        layout: "general"
-    },
+// Get train details from URL
+const params = new URLSearchParams(window.location.search);
 
-    {
-        name: "GEN",
-        type: "General",
-        layout: "general"
-    },
+const trainNumber = params.get("trainNumber");
+const trainName = params.get("trainName");
 
-    {
-        name: "A1",
-        type: "AC 2-Tier",
-        layout: "ac2"
-    },
+const trainTitle = document.getElementById("train-title");
 
-    {
-        name: "B1",
-        type: "AC 3-Tier",
-        layout: "ac3"
-    },
+if (trainNumber && trainName) {
+    trainTitle.textContent = `${trainNumber} - ${trainName}`;
+} else {
+    trainTitle.textContent = "Train details unavailable";
+}
 
-    {
-        name: "B2",
-        type: "AC 3-Tier",
-        layout: "ac3"
-    },
-
-    {
-        name: "B3",
-        type: "AC 3-Tier",
-        layout: "ac3"
-    },
-
-    {
-        name: "B4",
-        type: "AC 3-Tier",
-        layout: "ac3"
-    },
-
-    {
-        name: "B5",
-        type: "AC 3-Tier",
-        layout: "ac3"
-    },
-
-    {
-        name: "B6",
-        type: "AC 3-Tier",
-        layout: "ac3"
-    },
-
-    {
-        name: "S1",
-        type: "Sleeper",
-        layout: "sleeper"
-    },
-
-    {
-        name: "S2",
-        type: "Sleeper",
-        layout: "sleeper"
-    },
-
-    {
-        name: "S3",
-        type: "Sleeper",
-        layout: "sleeper"
-    },
-
-    {
-        name: "S4",
-        type: "Sleeper",
-        layout: "sleeper"
-    },
-
-    {
-        name: "S5",
-        type: "Sleeper",
-        layout: "sleeper"
-    },
-
-    {
-        name: "S6",
-        type: "Sleeper",
-        layout: "sleeper"
-    },
-
-    {
-        name: "S7",
-        type: "Sleeper",
-        layout: "sleeper"
-    },
-
-    {
-        name: "S8",
-        type: "Sleeper",
-        layout: "sleeper"
-    },
-
-    {
-        name: "S9",
-        type: "Sleeper",
-        layout: "sleeper"
-    }
-];
-
-
-let selected = 3;
+let coaches = [];
+let selected = 0;
 
 const coachList = document.getElementById("coach-list");
 const coachTitle = document.getElementById("coach-title");
 
+const API_BASE_URL = "http://localhost:5000";
+
 
 function renderSelector() {
-
     coachList.innerHTML = "";
 
     const train = document.createElement("div");
-
     train.className = "coach-item";
 
     train.innerHTML = `
@@ -129,9 +33,7 @@ function renderSelector() {
 
     coachList.appendChild(train);
 
-
     coaches.forEach((coach, index) => {
-
         const item = document.createElement("div");
 
         item.className =
@@ -144,26 +46,18 @@ function renderSelector() {
             </div>
 
             <div class="coach-number">
-                ${index + 1}
+                ${coach.position}
             </div>
         `;
 
-
         item.onclick = () => {
-
             selected = index;
-
             updateHeader();
-
             renderSelector();
-
             renderLayout();
-
         };
 
-
         coachList.appendChild(item);
-
     });
 }
 
@@ -171,7 +65,6 @@ function renderSelector() {
 /* HEADER */
 
 function updateHeader() {
-
     const coach = coaches[selected];
 
     coachTitle.textContent =
@@ -182,14 +75,12 @@ function updateHeader() {
 /* LAYOUT */
 
 function renderLayout() {
-
     const coach = coaches[selected];
 
     const container =
         document.getElementById("coach-layout");
 
     container.innerHTML = "";
-
 
     if (coach.layout === "general") {
         renderGeneral(container);
@@ -205,6 +96,14 @@ function renderLayout() {
 
     else if (coach.layout === "sleeper") {
         renderSleeper(container);
+    }
+
+    else {
+        container.innerHTML = `
+            <div class="general-compartment">
+                Layout not available for ${coach.name} (${coach.type})
+            </div>
+        `;
     }
 }
 
@@ -452,11 +351,78 @@ function createSideBerth(number, type) {
     `;
 }
 
+async function loadCoachData() {
+    if (!trainNumber) {
+        trainTitle.textContent = "Train number unavailable";
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${API_BASE_URL}/api/trains/coach/${encodeURIComponent(trainNumber)}`
+        );
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch coach data");
+        }
+
+        const result = await response.json();
+
+        if (!result.success || !result.data?.coaches) {
+            throw new Error("Invalid coach data");
+        }
+
+        // Use the actual train details returned by the API
+        trainTitle.textContent =
+            `${result.data.train_no} - ${result.data.train_name}`;
+
+        coaches = result.data.coaches.map((coach) => {
+            let layout = "unavailable";
+
+            if (coach.type === "GN") {
+                layout = "general";
+            }
+            else if (coach.type === "SL") {
+                layout = "sleeper";
+            }
+            else if (coach.type === "2A") {
+                layout = "ac2";
+            }
+            else if (coach.type === "3A" || coach.type === "3E") {
+                layout = "ac3";
+            }
+
+            return {
+                name: coach.coach,
+                type: coach.type_label,
+                layout: layout,
+                position: coach.position
+            };
+        });
+
+        if (coaches.length === 0) {
+            throw new Error("No coaches found");
+        }
+
+        selected = 0;
+
+        updateHeader();
+        renderSelector();
+        renderLayout();
+
+    } catch (error) {
+        console.error("Coach API Error:", error);
+
+        coachTitle.textContent = "Unable to load coach data";
+
+        document.getElementById("coach-layout").innerHTML = `
+            <div class="general-compartment">
+                Unable to load coach information.
+            </div>
+        `;
+    }
+}
 
 /* INITIAL LOAD */
 
-updateHeader();
-
-renderSelector();
-
-renderLayout();
+loadCoachData();

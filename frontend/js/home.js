@@ -330,14 +330,50 @@
     document.head.appendChild(style);
   }
 
+ /* ────────── Coach Position ────────── */
+function initCoachPosition() {
+  const trainInput = $('#coach-train-input');
+  const coachButton = $('#coach-position-btn');
+
+  if (!trainInput || !coachButton) return;
+
+  coachButton.addEventListener('click', () => {
+    const value = trainInput.value.trim();
+
+    if (!value) {
+      shakeInput(trainInput);
+      return;
+    }
+
+    const searchValue = value.toLowerCase();
+
+    const train = MOCK_TRAINS.find(
+      (t) =>
+        t.number === value ||
+        t.name.toLowerCase() === searchValue
+    );
+
+    if (!train) {
+      alert('Train not found. Please enter a valid train number or train name.');
+      return;
+    }
+
+    const url =
+      `coach.html?trainNumber=${encodeURIComponent(train.number)}` +
+      `&trainName=${encodeURIComponent(train.name)}`;
+
+    window.location.href = url;
+  });
+}
   /* ────────── Init ────────── */
-  function init() {
+    function init() {
     injectShakeKeyframes();
     initTabs();
     initAutocomplete();
     initSwapButton();
     initFindTrainsSearch();
     initPNRSearch();
+    initCoachPosition();
     initMobileMenu();
     initFloatingBar();
     initKeyboard();

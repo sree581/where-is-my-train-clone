@@ -136,6 +136,35 @@ app.get('/api/trains/between/:from/:to', async (req, res) => {
     }
 });
 
+// Coach Position
+app.get('/api/trains/coach/:trainNo', async (req, res) => {
+    const { trainNo } = req.params;
+
+    try {
+        const response = await axios.get(
+            `https://${RAPIDAPI_HOST}/coach-position/${trainNo}`,
+            {
+                headers: {
+                    'x-rapidapi-key': RAPIDAPI_KEY,
+                    'x-rapidapi-host': RAPIDAPI_HOST
+                }
+            }
+        );
+
+        res.json(response.data);
+    } catch (err) {
+        console.error(
+            "Coach Position API Error:",
+            err.response?.data || err.message
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch coach position"
+        });
+    }
+});
+
 // History Endpoint (To prove MongoDB integration during evaluation)
 app.get('/api/history', async (req, res) => {
     try {
