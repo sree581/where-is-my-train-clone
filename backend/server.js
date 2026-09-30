@@ -3,11 +3,13 @@ const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const Train = require('./models/Train');
+const Feedback = require('./models/Feedback');
 
 const app = express();
 // X-Data-Source tells the frontend whether it got live RapidAPI data or the sample fallback
 app.use(cors({ exposedHeaders: ['X-Data-Source'] }));
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
 
 const PORT = process.env.PORT || 5000;
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
@@ -34,9 +36,86 @@ const searchSchema = new mongoose.Schema({
 
 const SearchHistory = mongoose.model('SearchHistory', searchSchema);
 
+const isDbConnected = () => mongoose.connection.readyState === 1;
+
 
 // ==========================================
-// 2. API ENDPOINTS
+// 2. SAVED TIMETABLES (MongoDB "trains" collection, filled by seed.js)
+//    Used when RapidAPI has no live data, before the hard-coded fallback.
+// ==========================================
+
+// "HH:MM" on journey day N -> minutes since day 1 00:00
+function toMinutes(time, day) {
+    const match = /^(\d{1,2}):(\d{2})$/.exec(time || '');
+    return match ? (day - 1) * 1440 + Number(match[1]) * 60 + Number(match[2]) : null;
+}
+
+function formatDuration(minutes) {
+    if (minutes === null || minutes < 0) return 'N/A';
+    return `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, '0')}m`;
+}
+
+// Returns the train in the /spot response shape, or null if it isn't saved
+async function findSavedTrain(trainNumber) {
+    if (!isDbConnected()) return null;
+
+    const train = await Train.findOne({ trainNumber }).lean();
+    if (!train) return null;
+
+    return {
+        trainNumber: train.trainNumber,
+        trainName: train.trainName,
+        source: train.source,
+        destination: train.destination,
+        runsOn: train.runsOn,
+        positionStatus: 'Scheduled timetable (live position unavailable)',
+        delayMinutes: null,
+        schedule: train.schedule.map(stop => ({
+            stationName: stop.stationName,
+            stationCode: stop.stationCode,
+            arrivalTime: stop.arrivalTime,
+            departureTime: stop.departureTime,
+            day: stop.day,
+            platform: stop.platform
+        }))
+    };
+}
+
+// Returns saved trains that stop at `from` and later at `to` (the /between response shape),
+// or null when no timetables have been seeded at all
+async function findSavedTrainsBetween(from, to) {
+    if (!isDbConnected()) return null;
+    if (await Train.estimatedDocumentCount() === 0) return null;
+
+    const candidates = await Train.find({ 'schedule.stationCode': { $all: [from, to] } }).lean();
+
+    return candidates
+        .map(train => {
+            const fromIndex = train.schedule.findIndex(stop => stop.stationCode === from);
+            const toIndex = train.schedule.findIndex(stop => stop.stationCode === to);
+            if (fromIndex === -1 || toIndex === -1 || fromIndex >= toIndex) return null;
+
+            const fromStop = train.schedule[fromIndex];
+            const toStop = train.schedule[toIndex];
+            const start = toMinutes(fromStop.departureTime, fromStop.day);
+            const end = toMinutes(toStop.arrivalTime, toStop.day);
+
+            return {
+                trainNumber: train.trainNumber,
+                trainName: train.trainName,
+                departureTime: fromStop.departureTime,
+                arrivalTime: toStop.arrivalTime,
+                travelTime: start !== null && end !== null ? formatDuration(end - start) : 'N/A',
+                runsOn: train.runsOn
+            };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.departureTime.localeCompare(b.departureTime));
+}
+
+
+// ==========================================
+// 3. API ENDPOINTS
 // ==========================================
 
 // Spot Train Route and Live Status
@@ -61,6 +140,16 @@ app.get('/api/trains/spot/:query', async (req, res) => {
         res.set('X-Data-Source', 'live').json(response.data);
     } catch (err) {
         console.error("Spot Train API Error:", err.response?.data || err.message);
+
+        // Next best: the saved timetable for this train in MongoDB
+        try {
+            const savedTrain = await findSavedTrain(query);
+            if (savedTrain) {
+                return res.set('X-Data-Source', 'database').json(savedTrain);
+            }
+        } catch (dbErr) {
+            console.error('Saved timetable lookup failed:', dbErr.message);
+        }
 
         // Fallback mock payload for offline testing/presentation
         res.set('X-Data-Source', 'fallback').json({
@@ -109,15 +198,11 @@ app.get('/api/trains/between/:from/:to', async (req, res) => {
         });
 
         const rawData = response.data;
-        let list = rawData?.data || rawData?.trains || (Array.isArray(rawData) ? rawData : []);
-        let dataSource = 'live';
+        const list = rawData?.data || rawData?.trains || (Array.isArray(rawData) ? rawData : []);
 
         if (!Array.isArray(list) || list.length === 0) {
-            dataSource = 'fallback';
-            list = [
-                { train_number: "12626", train_name: "KERALA EXPRESS", departure_time: "20:10", arrival_time: "18:00", duration: "45h 50m" },
-                { train_number: "12618", train_name: "MANGALA LAKSHADWEEP EXP", departure_time: "05:40", arrival_time: "10:25", duration: "50h 45m" }
-            ];
+            // Handled below: saved timetables, then the sample list
+            throw new Error('RapidAPI returned no trains');
         }
 
         const trainList = list.map(t => ({
@@ -128,9 +213,19 @@ app.get('/api/trains/between/:from/:to', async (req, res) => {
             travelTime: t.travel_time || t.duration || 'N/A'
         }));
 
-        res.set('X-Data-Source', dataSource).json(trainList);
+        res.set('X-Data-Source', 'live').json(trainList);
     } catch (err) {
         console.error("Between Stations API Error:", err.response?.data || err.message);
+
+        // Next best: saved timetables in MongoDB (an empty list means no saved train runs this route)
+        try {
+            const savedTrains = await findSavedTrainsBetween(from.toUpperCase(), to.toUpperCase());
+            if (savedTrains) {
+                return res.set('X-Data-Source', 'database').json(savedTrains);
+            }
+        } catch (dbErr) {
+            console.error('Saved timetable lookup failed:', dbErr.message);
+        }
 
         res.set('X-Data-Source', 'fallback').json([
             { trainNumber: "12626", trainName: "KERALA EXPRESS", departureTime: "20:10", arrivalTime: "18:00", travelTime: "45h 50m" },
@@ -217,7 +312,65 @@ app.get('/api/history', async (req, res) => {
     }
 });
 
+// Help Desk feedback form
+app.post('/api/feedback', async (req, res) => {
+    const { name, email, category, message } = req.body || {};
+
+    if (typeof message !== 'string' || message.trim().length < 5) {
+        return res.status(400).json({ success: false, message: "Please write a message of at least 5 characters" });
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ success: false, message: "Please enter a valid email address" });
+    }
+    if (!isDbConnected()) {
+        return res.status(503).json({ success: false, message: "Feedback can't be saved right now. Please try again later." });
+    }
+
+    try {
+        const feedback = await Feedback.create({
+            name: name || undefined,
+            email: email || undefined,
+            category: category || undefined,
+            message
+        });
+        res.status(201).json({ success: true, message: "Thank you! Your feedback has been received.", id: feedback._id });
+    } catch (err) {
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ success: false, message: Object.values(err.errors)[0].message });
+        }
+        console.error('Error saving feedback:', err.message);
+        res.status(500).json({ success: false, message: "Failed to save feedback" });
+    }
+});
+
+
+// ==========================================
+// 4. ERROR HANDLING
+// ==========================================
+
+// Unknown /api routes answer in JSON instead of Express's HTML page
+app.use('/api', (req, res) => {
+    res.status(404).json({ success: false, message: `No API route for ${req.method} ${req.originalUrl}` });
+});
+
+// Last-resort handler, e.g. for malformed or oversized JSON bodies sent to POST routes.
+// Express only treats a middleware as an error handler when it takes all four arguments.
+app.use((err, req, res, next) => {
+    const status = err.status || err.statusCode || 500;
+    const messages = { 400: "Invalid request body", 413: "Request body is too large" };
+
+    if (status >= 500) console.error('Unhandled server error:', err);
+    res.status(status).json({ success: false, message: messages[status] || "Internal server error" });
+});
+
 // Start Server
-app.listen(PORT, () => {
+// Express 5 passes listen errors (e.g. port already in use) to this callback
+app.listen(PORT, (err) => {
+    if (err) {
+        console.error(err.code === 'EADDRINUSE'
+            ? `❌ Port ${PORT} is already in use. Stop the other server (or change PORT in .env) and try again.`
+            : `❌ Server failed to start: ${err.message}`);
+        process.exit(1);
+    }
     console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
