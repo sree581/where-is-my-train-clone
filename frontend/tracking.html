@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Track Train - Where Is My Train</title>
+
+    <link rel="stylesheet" href="css/tracking.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="tracking-header">
+        <div class="header-content">
+            <a href="index.html" class="back-link">← Home</a>
+            <h1>🚆 Where Is My Train</h1>
+        </div>
+    </header>
+
+
+    <!-- Main Content -->
+    <main class="tracking-container">
+
+        <!-- Page Heading -->
+        <section class="tracking-intro">
+            <h2>Track Your Train</h2>
+            <p>
+                Enter your train number to check its current running status.
+            </p>
+        </section>
+
+
+        <!-- Search Box -->
+        <section class="tracking-search">
+
+            <form id="tracking-form">
+
+                <label for="train-number">
+                    Train Number
+                </label>
+
+                <div class="search-row">
+
+                    <input
+                        type="text"
+                        id="train-number"
+                        placeholder="Enter train number"
+                        maxlength="6"
+                        required
+                    >
+
+                    <button type="submit" id="track-button">
+                        🔍 Track Train
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- Loading Message -->
+        <div id="loading" class="loading hidden">
+            <p>Checking train status...</p>
+        </div>
+
+
+        <!-- Error Message -->
+        <div id="error-message" class="error-message hidden">
+        </div>
+
+
+        <!-- Train Status -->
+        <section id="train-result" class="train-result hidden">
+
+            <!-- Train Basic Information -->
+            <div class="train-card">
+
+                <div class="train-heading">
+                    <h2 id="train-name">Train Name</h2>
+                    <span id="train-number-display">00000</span>
+                </div>
+
+                <div class="status-box">
+                    <h3>Current Status</h3>
+                    <p id="train-status">-</p>
+                </div>
+
+                <div class="train-info-grid">
+
+                    <div class="info-item">
+                        <span class="info-label">Source</span>
+                        <strong id="source-station">-</strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Destination</span>
+                        <strong id="destination-station">-</strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Current Location</span>
+                        <strong id="current-location">-</strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Delay</span>
+                        <strong id="delay">-</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Journey Schedule -->
+            <div class="schedule-card">
+
+                <h2>Journey Schedule</h2>
+
+                <div id="schedule-container">
+
+                    <!-- Station details will be inserted here by tracking.js -->
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- Footer -->
+    <footer class="tracking-footer">
+        <p>
+            © 2026 Where Is My Train
+        </p>
+    </footer>
+
+
+    <!-- JavaScript -->
+    <script src="js/tracking.js"></script>
+
+</body>
+</html>
