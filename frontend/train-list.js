@@ -357,7 +357,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     </span>
 
                     <span class="coach">
-                        C
+                        ${train.travelTime || "N/A"}
                     </span>
 
                 </div>
