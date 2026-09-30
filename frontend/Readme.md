@@ -1,5 +1,7 @@
 # 🚆 Where Is My Train — Simple Train Tracker!
 
+> 📘 This is the short, beginner-friendly overview. For full technical documentation (setup, environment variables, middleware, API reference, MongoDB models, testing, troubleshooting) see the main [README.md](../README.md).
+
 Welcome to the **Where Is My Train** website! This is a simple, easy-to-use website that helps you find out where your train is, what time it will arrive, and where your train car is standing on the station platform! 🚂💨
 
 ---
