@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Help & Support — Get answers to common questions about train status, PNR, schedules, and more on Where Is My Train.">
+  <title>Help & Support — Where Is My Train</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Shared base styles -->
+  <link rel="stylesheet" href="css/home.css">
+  <!-- Page-specific styles -->
+  <link rel="stylesheet" href="css/helpdesk.css">
+</head>
+<body>
+
+  <!-- ===== Header (reused from Home) ===== -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="logo" aria-label="Where Is My Train Home">
+        <span class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/><circle cx="8" cy="7" r="1" fill="#fff" stroke="none"/><circle cx="16" cy="7" r="1" fill="#fff" stroke="none"/></svg>
+        </span>
+        Where is my Train
+      </a>
+      <div class="header-actions">
+        <button class="lang-select" aria-label="Language selector">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg>
+          EN
+        </button>
+        <button class="header-icon-btn" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="header-icon-btn" aria-label="Theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v1m0 16v1m-8-9H3m18 0h-1m-2.636-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707"/><circle cx="12" cy="12" r="4"/></svg>
+        </button>
+        <button class="header-icon-btn mobile-menu-btn" id="mobile-menu-open" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Breadcrumb ===== -->
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="index.html">Home</a>
+    <span class="sep">›</span>
+    <span class="current">Help Desk</span>
+  </nav>
+
+  <!-- ===== Page Title ===== -->
+  <section class="help-title-section">
+    <h1>Help &amp; Support</h1>
+    <p>We are here to help you. Find answers or get in touch with us.</p>
+  </section>
+
+  <!-- ===== Help Search ===== -->
+  <div class="help-search-wrap">
+    <div class="help-search-box">
+      <input type="text" id="help-search-input" placeholder="Search for help topics..." aria-label="Search help topics">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+  </div>
+
+  <!-- ===== Main Content ===== -->
+  <main class="help-content">
+
+    <!-- Popular Help Topics -->
+    <h2 class="help-section-title" id="popular-topics-heading">Popular Help Topics</h2>
+    <div class="help-topics-grid" id="help-topics-grid" aria-labelledby="popular-topics-heading">
+
+      <!-- 1. Train Running Status -->
+      <div class="help-topic-card" tabindex="0" role="button" aria-label="Train Running Status">
+        <div class="topic-icon-wrap blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
+        </div>
+        <h3>Train Running Status</h3>
+        <p class="topic-desc">Know how to check live train status and delays.</p>
+        <span class="topic-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+
+      <!-- 2. PNR Status -->
+      <div class="help-topic-card" tabindex="0" role="button" aria-label="PNR Status">
+        <div class="topic-icon-wrap green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <h3>PNR Status</h3>
+        <p class="topic-desc">Check your PNR status and understand waitlist.</p>
+        <span class="topic-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+
+      <!-- 3. Train Schedule -->
+      <div class="help-topic-card" tabindex="0" role="button" aria-label="Train Schedule">
+        <div class="topic-icon-wrap blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <h3>Train Schedule</h3>
+        <p class="topic-desc">Find train schedules, routes and stoppages.</p>
+        <span class="topic-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+
+      <!-- 4. Platform & Station Info -->
+      <div class="help-topic-card" tabindex="0" role="button" aria-label="Platform and Station Info">
+        <div class="topic-icon-wrap teal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <h3>Platform &amp; Station Info</h3>
+        <p class="topic-desc">Find platform numbers and station details.</p>
+        <span class="topic-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+
+      <!-- 5. Account & Profile -->
+      <div class="help-topic-card" tabindex="0" role="button" aria-label="Account and Profile">
+        <div class="topic-icon-wrap purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h3>Account &amp; Profile</h3>
+        <p class="topic-desc">Manage your account, preferences and history.</p>
+        <span class="topic-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+
+      <!-- 6. App & Website Issues -->
+      <div class="help-topic-card" tabindex="0" role="button" aria-label="App and Website Issues">
+        <div class="topic-icon-wrap red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        </div>
+        <h3>App &amp; Website Issues</h3>
+        <p class="topic-desc">Report issues or bugs on the website/app.</p>
+        <span class="topic-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </div>
+
+      <!-- No results message -->
+      <div class="no-topics-msg" id="no-topics-msg">No matching topics found.</div>
+    </div>
+
+    <!-- Need More Help -->
+    <h2 class="help-section-title">Need More Help?</h2>
+    <div class="more-help-grid">
+      <!-- Contact Us -->
+      <div class="more-help-card">
+        <div class="mh-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div>
+          <h3>Contact Us</h3>
+          <p class="mh-desc">Still need help? Reach out to our support team.</p>
+          <a href="mailto:support@whereismytrain.in" class="mh-link" id="contact-support-link">Contact Support →</a>
+        </div>
+      </div>
+      <!-- Feedback -->
+      <div class="more-help-card">
+        <div class="mh-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <div>
+          <h3>Feedback</h3>
+          <p class="mh-desc">Share your feedback to help us improve.</p>
+          <a href="#" class="mh-link" id="give-feedback-link">Give Feedback →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other Ways to Reach Us -->
+    <h2 class="help-section-title">Other Ways to Reach Us</h2>
+    <div class="reach-grid">
+      <!-- Email Support -->
+      <div class="reach-card">
+        <div class="reach-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </div>
+        <h3>Email Support</h3>
+        <p class="reach-highlight">support@whereismytrain.in</p>
+        <p class="reach-detail">We usually reply within 24 hours</p>
+      </div>
+      <!-- Customer Care -->
+      <div class="reach-card">
+        <div class="reach-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+        <h3>Customer Care</h3>
+        <p class="reach-highlight">+91 91778 33333</p>
+        <p class="reach-detail">Mon – Sun | 8:00 AM – 10:00 PM</p>
+      </div>
+      <!-- Social Media -->
+      <div class="reach-card">
+        <div class="reach-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </div>
+        <h3>Social Media</h3>
+        <p class="reach-detail" style="margin-bottom:6px;">Stay connected with us on social media.</p>
+        <div class="social-icons">
+          <a href="#" class="social-icon-btn twitter" aria-label="Twitter">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53A4.48 4.48 0 0 0 22.43.36a9.06 9.06 0 0 1-2.88 1.1A4.52 4.52 0 0 0 11.96 7.5 12.84 12.84 0 0 1 1.67 2.15 4.52 4.52 0 0 0 3.07 8.2 4.49 4.49 0 0 1 1 7.54v.06a4.52 4.52 0 0 0 3.63 4.43 4.52 4.52 0 0 1-2.04.08 4.53 4.53 0 0 0 4.22 3.14A9.06 9.06 0 0 1 0 17.54 12.78 12.78 0 0 0 6.92 19.5c8.31 0 12.85-6.88 12.85-12.85 0-.2 0-.39-.01-.58A9.22 9.22 0 0 0 23 3z"/></svg>
+          </a>
+          <a href="#" class="social-icon-btn facebook" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3V2z"/></svg>
+          </a>
+          <a href="#" class="social-icon-btn youtube" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33 2.78 2.78 0 0 0 1.94 2c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#fff"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="site-footer" id="site-footer">
+    <div class="footer-inner">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo">
+            <span class="logo-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
+            </span>
+            Where is my Train
+          </a>
+          <p>India's No.1 train status, route tracker &amp; PNR status platform.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#">Train Status</a></li>
+            <li><a href="#">PNR Status</a></li>
+            <li><a href="#">Find Trains</a></li>
+            <li><a href="helpdesk.html">Contact Us</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="helpdesk.html">Support</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2025 WhereIsMyTrain.com | All rights reserved</span>
+        <span>Made with ❤️ in India</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== Floating Bar ===== -->
+  <div class="floating-bar" id="floating-bar">
+    <button class="floating-close" id="floating-close" aria-label="Close floating bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <button class="live-map-btn" id="live-map-btn" aria-label="Open live train map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><path d="M12 17v4"/><path d="M8 21h8"/></svg>
+      Live train map
+    </button>
+  </div>
+
+  <!-- ===== Mobile Navigation ===== -->
+  <div class="mobile-nav-overlay" id="mobile-nav" aria-hidden="true">
+    <nav class="mobile-nav-panel" aria-label="Mobile Navigation">
+      <div class="mobile-nav-close">
+        <button id="mobile-nav-close" aria-label="Close navigation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <ul class="mobile-nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="#">Live Train Status</a></li>
+        <li><a href="#">PNR Status</a></li>
+        <li><a href="#">Train Schedule</a></li>
+        <li><a href="helpdesk.html">Help Desk</a></li>
+        <li><a href="#">About</a></li>
+      </ul>
+    </nav>
+  </div>
+
+  <script src="js/helpdesk.js"></script>
+</body>
+</html>
