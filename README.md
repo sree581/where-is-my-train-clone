@@ -2,12 +2,15 @@
 
 A railway information web app inspired by the *Where Is My Train* app, built as a college **Advanced Web Technologies (AWT)** group project.
 
-Users can search trains between two stations, check the running status and schedule of a train, see the coach position (coach order) of a train, check PNR status, and get help from a Help Desk page.
+Users can search trains between two stations, check the running status and schedule of a train, see the coach position (coach order) of a train, check PNR status, and get help (and send feedback) from a Help Desk page.
 
 ```
 Frontend (HTML / CSS / JavaScript)  ──fetch()──▶  Express backend (Node.js)  ──axios──▶  RapidAPI (IRCTC API)
                                                         │
-                                                        └──mongoose──▶  MongoDB Atlas (search history)
+                                                        └──mongoose──▶  MongoDB Atlas
+                                                                          • search history
+                                                                          • saved train timetables
+                                                                          • Help Desk feedback
 ```
 
 ---
@@ -44,13 +47,16 @@ Frontend (HTML / CSS / JavaScript)  ──fetch()──▶  Express backend (Nod
 
 | Feature | Page | Data source |
 |---|---|---|
-| Search trains between two stations | `train-list.html` | Backend → RapidAPI, with sample fallback data |
-| Live running status and schedule of a train | `tracking.html` | Backend → RapidAPI, with sample fallback data |
+| Search trains between two stations | `train-list.html` | RapidAPI → saved timetables in MongoDB → sample data |
+| Live running status and schedule of a train | `tracking.html` | RapidAPI → saved timetables in MongoDB → sample data |
 | Coach position (order of coaches) and seat layouts | `coach.html` | **Live** from RapidAPI; static sample layout as fallback |
 | PNR status | `index.html` (PNR tab) | **Live** from RapidAPI |
-| Help Desk (searchable help topics, contact links) | `helpdesk.html` | Static content |
+| Help Desk: searchable help topics with answers | `helpdesk.html` | Static content |
+| Help Desk: feedback form | `helpdesk.html` | Saved to MongoDB (`POST /api/feedback`) |
 | Search history (proves MongoDB integration) | `GET /api/history` | MongoDB Atlas |
-| Classic tracker with a route timeline | `index-legacy.html` | Backend → RapidAPI, with sample fallback data |
+| Classic tracker with a route timeline | `index-legacy.html` | Same sources as the Live Status page |
+
+The train list and Live Status pages say where their data came from: live, the saved timetable, or sample data. See [Live data vs. fallback data](#live-data-vs-fallback-data).
 
 ---
 
@@ -86,19 +92,21 @@ Frontend (HTML / CSS / JavaScript)  ──fetch()──▶  Express backend (Nod
 where-is-my-train-clone/
 ├── .gitignore                 # ignores node_modules/ and .env
 ├── README.md                  # this file
-├── package.json               # stray root manifest (only mongoose); not needed to run the app
 │
 ├── backend/
-│   ├── server.js              # Express app: middleware, MongoDB connection, all API routes
+│   ├── server.js              # Express app: middleware, MongoDB connection, all API routes, error handlers
 │   ├── models/
-│   │   └── Train.js           # Mongoose model for train schedules (used by seed.js only)
-│   ├── seed.js                # optional script that fills the "trains" collection with sample data
-│   ├── package.json           # backend dependencies
+│   │   ├── Train.js           # Mongoose model for saved train timetables ("trains" collection)
+│   │   └── Feedback.js        # Mongoose model for Help Desk feedback ("feedbacks" collection)
+│   ├── seed.js                # fills the "trains" collection with 7 sample timetables (npm run seed)
+│   ├── package.json           # backend dependencies and npm scripts (start, seed)
 │   ├── package-lock.json
 │   ├── .env.example           # template for your .env (no real secrets)
 │   └── .env                   # YOUR secrets. Not committed; create it yourself.
 │
 └── frontend/
+    ├── js/config.js           # shared settings: the backend URL (API_BASE_URL). Loaded by every page.
+    │
     ├── index.html             # Home page: Search Train / PNR Status / Coach Position tabs
     ├── css/home.css           # Home page styles (also used by helpdesk.html)
     ├── js/home.js             # Home page logic (tabs, autocomplete, PNR fetch, navigation)
@@ -115,7 +123,7 @@ where-is-my-train-clone/
     ├── coach.css
     ├── coach.js
     │
-    ├── helpdesk.html          # Help Desk
+    ├── helpdesk.html          # Help Desk (help topics, answer dialog, feedback form)
     ├── css/helpdesk.css
     ├── js/helpdesk.js
     │
@@ -123,7 +131,6 @@ where-is-my-train-clone/
     ├── script.js              # logic for index-legacy.html
     ├── style.css              # styles for index-legacy.html (also linked by index.html)
     │
-    ├── app.js                 # old prototype script; not referenced by any page
     └── Readme.md              # short beginner-friendly overview
 ```
 
@@ -160,10 +167,32 @@ Open `backend/.env` and fill in your own values (see [Environment Variables](#en
 npm install
 ```
 
-### 4. Start the backend
+### 4. Load the sample timetables (first time only)
 
 ```bash
-node server.js
+npm run seed
+```
+
+This fills the `trains` collection with 7 sample timetables. The server uses them when RapidAPI has no live data (see [Live data vs. fallback data](#live-data-vs-fallback-data)).
+
+⚠️ Seeding **replaces everything** in the `trains` collection. Search history and feedback are not touched. The timings are approximate demo data, not official Indian Railways timetables.
+
+| Train | Name | Route |
+|---|---|---|
+| 12625 | Kerala Express | TVC → QLN → KTYM → ERN → TCR → PGT → … → NDLS |
+| 12626 | Kerala Express | NDLS → … → PGT → TCR → ERN → KTYM → QLN → TVC |
+| 16301 | Venad Express | TVC → QLN → KTYM → ERS → TCR → SRR |
+| 12076 | Jan Shatabdi Express | TVC → QLN → ALLP → ERS → TCR → CLT |
+| 16347 | Mangaluru Express | TVC → QLN → ALLP → ERS → CLT → CAN → MAQ |
+| 12618 | Mangala Lakshadweep Express | ERS → TCR → CLT → CAN → MAQ → NZM |
+| 12002 | Bhopal Shatabdi Express | NDLS → AGC → GWL → RKMP |
+
+Good routes to try: `QLN → ERS`, `TVC → CLT`, `ERS → MAQ`, `NDLS → TVC`.
+
+### 5. Start the backend
+
+```bash
+npm start            # same as: node server.js
 ```
 
 You should see:
@@ -173,22 +202,21 @@ You should see:
 ✅ Connected to MongoDB Atlas successfully!
 ```
 
-Keep this terminal open while you use the app.
+Keep this terminal open while you use the app. If you see `❌ Port 5000 is already in use`, another copy of the server is still running; stop it first.
 
-### 5. Open the frontend
+### 6. Open the frontend
 
 Open `frontend/index.html` in your browser. Double-clicking it works, because the pages are opened directly as files and need no web server.
 
 If you prefer serving the pages over HTTP, any static server works, for example the VS Code **Live Server** extension or `npx serve frontend`. The backend allows every origin through CORS, so both ways work.
 
-### (Optional) Seed the `trains` collection
+### npm scripts (run inside `backend/`)
 
-```bash
-cd backend
-node seed.js
-```
-
-⚠️ `seed.js` **deletes every document** in the `trains` collection before inserting 2 sample trains. It does not touch the search history. The running server does not read this collection; it is there for demonstration.
+| Command | What it does |
+|---|---|
+| `npm install` | Installs the dependencies from `package.json` |
+| `npm start` | Starts the API server (`node server.js`) |
+| `npm run seed` | Replaces the `trains` collection with the sample timetables (`node seed.js`) |
 
 ---
 
@@ -203,8 +231,10 @@ All variables live in `backend/.env`, which git ignores and must never be commit
 | `RAPIDAPI_KEY` | Yes, for live data | none | Your personal RapidAPI key. |
 | `RAPIDAPI_HOST` | No | `irctc-indian-railway-pnr-status.p.rapidapi.com` | RapidAPI host of the IRCTC API. |
 
-If `MONGO_URI` is missing, the server still starts. It prints a warning and skips history logging.
-If `RAPIDAPI_KEY` is wrong, the RapidAPI calls fail. The train status and trains-between routes then return sample data, and the coach and PNR routes return an error message.
+If `MONGO_URI` is missing, the server still starts. It prints a warning, skips history logging and saved timetables, and the feedback form answers "can't be saved right now".
+If `RAPIDAPI_KEY` is wrong, the RapidAPI calls fail. The train status and trains-between routes then use saved timetables or sample data, and the coach and PNR routes return an error message.
+
+The frontend's backend address is set in one place, [`frontend/js/config.js`](frontend/js/config.js) (`API_BASE_URL`, default `http://localhost:5000`). If you change `PORT`, change it there too.
 
 ---
 
@@ -215,31 +245,40 @@ All backend code is in [`backend/server.js`](backend/server.js).
 ### Startup sequence
 
 1. `require('dotenv').config()` reads `backend/.env` into `process.env`.
-2. An Express app is created, and the [middleware](#middleware) is registered.
-3. The configuration is read: `PORT`, `RAPIDAPI_KEY`, `RAPIDAPI_HOST`, `MONGO_URI`.
-4. `mongoose.connect(MONGO_URI)` starts connecting to MongoDB Atlas **in the background**, without blocking.
-5. The `SearchHistory` schema and model are defined.
-6. The API routes are registered.
-7. `app.listen(PORT)` starts the HTTP server.
+2. The `Train` and `Feedback` models are loaded from `models/`.
+3. An Express app is created, and the request [middleware](#middleware) is registered.
+4. The configuration is read: `PORT`, `RAPIDAPI_KEY`, `RAPIDAPI_HOST`, `MONGO_URI`.
+5. `mongoose.connect(MONGO_URI)` starts connecting to MongoDB Atlas **in the background**, without blocking.
+6. The `SearchHistory` schema and model are defined, along with the helpers that read saved timetables.
+7. The API routes are registered.
+8. The error-handling middleware is registered (JSON 404 for unknown `/api` routes, then the last-resort error handler).
+9. `app.listen(PORT)` starts the HTTP server. If the port is already in use, it prints `❌ Port 5000 is already in use…` and exits instead of pretending to start.
 
-Because the database connection does not block startup, the API can answer requests before MongoDB has connected. Every route checks `mongoose.connection.readyState === 1` (connected) before it writes history, so a slow or failed database connection never breaks an API response.
+Because the database connection does not block startup, the API can answer requests before MongoDB has connected. Every route checks `mongoose.connection.readyState === 1` (the `isDbConnected()` helper) before it touches the database, so a slow or failed database connection never breaks an API response.
 
 ### Middleware
 
-Middleware is a function that runs on each request before it reaches a route handler. The app registers these, in order:
+Middleware is a function that runs on a request before (or instead of) a route handler. Express runs them **in the order they are registered**. A request goes through this chain from top to bottom:
+
+```
+request ─▶ 1 CORS ─▶ 2 JSON body parser ─▶ 3 routes ─▶ 4 /api 404 handler ─▶ response
+                              │                  │
+                              └─── any error ────┴──────▶ 5 error handler ─▶ JSON error response
+```
 
 | # | Middleware | Code | What it does | Why the project needs it |
 |---|---|---|---|---|
-| 1 | **CORS** | `app.use(cors({ exposedHeaders: ['X-Data-Source'] }))` | Adds `Access-Control-Allow-Origin: *` to every response and answers browser pre-flight `OPTIONS` requests. It also adds `Access-Control-Expose-Headers: X-Data-Source`. | The frontend runs on a different origin (`file://` or another port) than the API (`http://localhost:5000`). Without CORS the browser would block every `fetch()`. Browsers hide custom response headers from JavaScript by default, so the expose setting is what lets the pages read `X-Data-Source`. |
-| 2 | **JSON body parser** | `app.use(express.json())` | Parses requests with `Content-Type: application/json` and puts the result in `req.body`. | Every current route is a `GET`, so nothing uses it yet. It is kept so that future `POST` routes (e.g. feedback or saving favourites) work without extra setup. |
-| 3 | **Router** (built into Express) | `app.get(...)` | Matches the method and path and fills `req.params` from `:placeholders`. | Handles the endpoints listed in the [API reference](#api-reference). |
-| 4 | **Default 404 handler** (built into Express) | none | Replies `404 Cannot GET /path` when no route matches. | No custom 404 handler is defined. |
-| 5 | **Default error handler** (built into Express) | none | Replies `500` if a route throws without catching the error. Express 5 forwards rejected `async` handlers here automatically. | Every route has its own `try/catch`, so this only acts as a safety net. |
+| 1 | **CORS** | `app.use(cors({ exposedHeaders: ['X-Data-Source'] }))` | Adds `Access-Control-Allow-Origin: *` to every response and answers browser pre-flight `OPTIONS` requests (needed before the feedback `POST`). It also adds `Access-Control-Expose-Headers: X-Data-Source`. | The frontend runs on a different origin (`file://` or another port) than the API (`http://localhost:5000`). Without CORS the browser would block every `fetch()`. Browsers hide custom response headers from JavaScript by default, so the expose setting is what lets the pages read `X-Data-Source`. |
+| 2 | **JSON body parser** | `app.use(express.json({ limit: '10kb' }))` | Parses requests with `Content-Type: application/json` into `req.body`. Bodies over 10 KB are rejected with `413`, and malformed JSON with `400`; both errors are passed on to the error handler (#5). | `POST /api/feedback` reads the form data from `req.body`. The size limit stops oversized requests from being processed. |
+| 3 | **Routes** | `app.get(...)`, `app.post(...)` | Matches the method and path and fills `req.params` from `:placeholders`. | The endpoints in the [API reference](#api-reference). |
+| 4 | **JSON 404 for the API** | `app.use('/api', (req, res) => …)` | Runs only when no route above matched a path starting with `/api`, and answers `404 { success: false, message: "No API route for GET /api/…" }`. | The frontend always expects JSON. Without this, Express would answer with an HTML "Cannot GET" page. |
+| 5 | **Error handler** | `app.use((err, req, res, next) => …)` | Catches errors passed down the chain: `400` "Invalid request body", `413` "Request body is too large", anything else `500` "Internal server error" (and prints it on the server). | Returns every error as JSON and never leaks stack traces to the browser. Express only treats a middleware as an error handler if it takes **all four** arguments, which is why `next` is declared even though it isn't used. Express 5 also sends rejected `async` route handlers here automatically. |
 
 **Not middleware, but related:**
 
 - **`dotenv`** is a configuration loader. It runs once at startup, not on each request.
 - **Search-history logging** is done **inside each route** rather than as a global middleware. That way each route decides what to record (for example, the PNR route masks the PNR before saving it). Logging is *fire-and-forget*: `SearchHistory.create(...)` is not awaited, so a slow database write never delays the response, and failures are only printed to the console.
+- **Input validation** is also done inside the routes: the PNR format check, and the feedback message and email checks, backed by the Mongoose schema rules.
 - **Static files** are not served by Express. The frontend is opened as plain files, separately from the API.
 - There is **no authentication and no rate limiting**. The API is meant for local development.
 
@@ -264,7 +303,7 @@ Middleware is a function that runs on each request before it reaches a route han
 
 A PNR identifies a passenger's booking. Masking means the public `/api/history` endpoint never shows a full PNR.
 
-**`Train` model** ([`backend/models/Train.js`](backend/models/Train.js)), stored in the `trains` collection. It is only used by `seed.js`.
+**`Train` model** ([`backend/models/Train.js`](backend/models/Train.js)), stored in the `trains` collection. It is filled by `npm run seed` and read by the train status and trains-between routes.
 
 | Field | Type |
 |---|---|
@@ -272,7 +311,30 @@ A PNR identifies a passenger's booking. Masking means the public `/api/history` 
 | `trainName` | String, required |
 | `source`, `destination` | String, required |
 | `runsOn` | [String], e.g. `["Daily"]` |
-| `schedule` | Array of `{ stationCode, stationName, arrivalTime, departureTime, day (default 1), platform (default "1") }` |
+| `schedule` | Array of `{ stationCode, stationName, arrivalTime, departureTime, day (default 1), platform (default "1") }`. `arrivalTime` is `"START"` at the first stop and `departureTime` is `"END"` at the last; `day` is the journey day (1, 2, 3…). |
+
+How the saved timetables are queried (`server.js`, section 2):
+
+- **`findSavedTrain(trainNumber)`**: `Train.findOne({ trainNumber })`, converted to the same shape as the `/spot` response.
+- **`findSavedTrainsBetween(from, to)`**:
+  1. `Train.find({ 'schedule.stationCode': { $all: [from, to] } })` finds trains that stop at both stations.
+  2. It keeps only trains that reach `from` **before** `to`, so direction matters.
+  3. It reads the departure time at `from` and the arrival time at `to`.
+  4. It works out the travel time using the journey `day` of each stop (e.g. 12:20 on day 1 to 13:30 on day 4 is `73h 10m`).
+  5. It sorts the trains by departure time.
+  6. It returns `null` if no timetables have been seeded at all. The route then falls back to the sample data.
+
+**`Feedback` model** ([`backend/models/Feedback.js`](backend/models/Feedback.js)), stored in the `feedbacks` collection.
+
+| Field | Type and rules |
+|---|---|
+| `name` | String, optional, max 100 characters, default `"Anonymous"` |
+| `email` | String, optional, max 200 characters |
+| `category` | One of `General`, `Bug Report`, `Feature Request`, `Data Issue` (default `General`) |
+| `message` | String, required, 5–2000 characters |
+| `submittedAt` | Date, defaults to the current time |
+
+There is no API route that lists feedback, so people's email addresses can't be read back through the public API. View the entries in MongoDB Atlas (**Browse Collections → feedbacks**).
 
 ### API reference
 
@@ -288,9 +350,27 @@ Running status and schedule of one train.
 
 - **Params:** `query`, a train number such as `12626`
 - **Calls RapidAPI:** `GET /getTrainStatus?trainNo=<query>&startDay=0`
+- **If that fails:** looks the train up in the saved timetables; if it isn't there, returns the sample train
 - **Logs:** `SPOT`
-- **Response header:** `X-Data-Source: live` or `fallback`
-- **Response (fallback shape):**
+- **Response header:** `X-Data-Source: live`, `database` or `fallback`
+- **Response (`database` shape):**
+
+```json
+{
+  "trainNumber": "16301",
+  "trainName": "Venad Express",
+  "source": "Thiruvananthapuram Central (TVC)",
+  "destination": "Shoranur Jn (SRR)",
+  "runsOn": ["Daily"],
+  "positionStatus": "Scheduled timetable (live position unavailable)",
+  "delayMinutes": null,
+  "schedule": [
+    { "stationName": "Thiruvananthapuram Central", "stationCode": "TVC", "arrivalTime": "START", "departureTime": "05:00", "day": 1, "platform": "1" }
+  ]
+}
+```
+
+- **Response (`fallback` shape):** used for trains that aren't in the database. The number you searched is kept, but everything else is sample data.
 
 ```json
 {
@@ -316,17 +396,18 @@ Trains running between two stations.
 
 - **Params:** `from` and `to`, station codes such as `QLN` and `ERS` (any case)
 - **Calls RapidAPI:** `GET /getTrainsBetweenStations?fromStationCode=QLN&toStationCode=ERS&dateOfJourney=DD-MM-YYYY` (today's date)
+- **If that fails or returns no trains:** searches the saved timetables; if none have been seeded, returns 2 sample trains
 - **Logs:** `BETWEEN_STATIONS`
-- **Response header:** `X-Data-Source: live` or `fallback`
-- **Response:** always normalised to this shape:
+- **Response header:** `X-Data-Source: live`, `database` or `fallback`
+- **Response:** always normalised to this shape (`runsOn` is included for `database` results):
 
 ```json
 [
-  { "trainNumber": "12626", "trainName": "KERALA EXPRESS", "departureTime": "20:10", "arrivalTime": "18:00", "travelTime": "45h 50m" }
+  { "trainNumber": "16301", "trainName": "Venad Express", "departureTime": "06:00", "arrivalTime": "09:15", "travelTime": "3h 15m", "runsOn": ["Daily"] }
 ]
 ```
 
-The backend maps several possible RapidAPI field names (`train_number` / `trainNo` / `train_no`, `departure_time` / `std`, and so on) to these five fields. If RapidAPI fails or returns an empty list, 2 sample trains are returned.
+For live data, the backend maps several possible RapidAPI field names (`train_number` / `trainNo` / `train_no`, `departure_time` / `std`, and so on) to these fields. With saved timetables, an **empty list `[]`** means that no saved train runs from `from` to `to` in that direction. The page then shows "No trains found".
 
 ---
 
@@ -392,29 +473,81 @@ The 10 most recent searches, newest first. Use it to show that MongoDB logging w
 
 - **Error response (`500`):** `{ "error": "Failed to fetch search history" }`
 
+---
+
+#### `POST /api/feedback`
+
+Saves a message from the Help Desk feedback form to MongoDB.
+
+- **Body (JSON, max 10 KB):**
+
+```json
+{ "name": "Anu", "email": "anu@example.com", "category": "Bug Report", "message": "The coach page did not load for 16301." }
+```
+
+  Only `message` is required.
+- **Validation:**
+  - `message` must be at least 5 characters long.
+  - `email`, if given, must look like an email address.
+  - `category` must be one of the four allowed values.
+  - Schema limits apply (see the [Feedback model](#mongodb-connection-and-models)).
+- **Success (`201`):** `{ "success": true, "message": "Thank you! Your feedback has been received.", "id": "…" }`
+- **Errors:**
+
+  | Status | When | Body |
+  |---|---|---|
+  | `400` | Validation failed | `{ "success": false, "message": "Please write a message of at least 5 characters" }`, and similar messages |
+  | `400` | Malformed JSON | `{ "success": false, "message": "Invalid request body" }` |
+  | `413` | Body over 10 KB | `{ "success": false, "message": "Request body is too large" }` |
+  | `503` | MongoDB not connected | `{ "success": false, "message": "Feedback can't be saved right now…" }` |
+  | `500` | Database write failed | `{ "success": false, "message": "Failed to save feedback" }` |
+
+```bash
+curl -X POST http://localhost:5000/api/feedback \
+  -H "Content-Type: application/json" \
+  -d '{"category":"General","message":"Great project!"}'
+```
+
+---
+
+#### Any other `/api/...` path
+
+`404` `{ "success": false, "message": "No API route for GET /api/..." }`
+
 ### Live data vs. fallback data
 
-The configured RapidAPI plan does **not** provide `/getTrainStatus` or `/getTrainsBetweenStations`; RapidAPI answers `404 Endpoint does not exist`. So that the app still works and can be demonstrated, these two routes return **sample (fallback) data** in that case and set the response header:
+The configured RapidAPI plan does **not** provide `/getTrainStatus` or `/getTrainsBetweenStations`; RapidAPI answers `404 Endpoint does not exist`. So that the app still works and can be demonstrated, these two routes fall back in steps:
 
 ```
-X-Data-Source: fallback
+1. RapidAPI (live)  ──fails──▶  2. Saved timetable in MongoDB  ──not found──▶  3. Hard-coded sample data
+   X-Data-Source: live             X-Data-Source: database                         X-Data-Source: fallback
 ```
 
-The train list and tracking pages read this header and show a notice: *"Live … data is unavailable right now – showing sample …"*. This keeps it clear which data is real.
+The train list and tracking page read the `X-Data-Source` header and tell the user where the data came from (the classic tracker does not show this notice):
 
-The **coach position** and **PNR** routes use real data only. They do not fall back to sample data.
+| Header value | Notice shown on the page |
+|---|---|
+| `live` | none |
+| `database` | *"Live … unavailable right now – showing saved timetables from our database."* |
+| `fallback` | *"Live … unavailable right now – showing sample trains / sample data."* |
+
+The **coach position** and **PNR** routes use real data only. They do not fall back to database or sample data (the coach **page** shows its own clearly labelled sample layout if the API fails).
 
 ### Error handling
 
 | Situation | What happens |
 |---|---|
-| RapidAPI fails on the train status or trains-between routes | The error is printed on the server, and sample data is returned with `X-Data-Source: fallback`. |
+| RapidAPI fails on the train status or trains-between routes | The error is printed on the server. The saved timetable is returned (`X-Data-Source: database`), or sample data if there is none (`fallback`). |
+| Saved-timetable lookup throws | The error is printed on the server, and sample data is returned. |
+| Invalid feedback | `400` with a readable message, shown in the form. |
+| Malformed or oversized JSON body | `400` / `413` from the error-handling middleware. |
 | RapidAPI fails on the coach route | `500` with a JSON message. `coach.js` then shows the static sample coach layout. |
 | RapidAPI fails on the PNR route | `502` with a JSON message, which the Home page displays. |
 | Invalid PNR format | `400`. It is also caught earlier in the browser. |
-| MongoDB not connected | History writes are skipped, and `/api/history` returns `500`. |
-| MongoDB write fails | The error is printed on the server. The API response is not affected. |
-| Unknown route | Express's default `404` response. |
+| MongoDB not connected | History writes and saved timetables are skipped, feedback returns `503`, and `/api/history` returns `500`. |
+| MongoDB history write fails | The error is printed on the server. The API response is not affected. |
+| Unknown `/api` route | JSON `404`. |
+| Port already in use at startup | Clear error message, and the process exits. |
 | Backend not running | Each page shows a "make sure the backend is running on port 5000" message. |
 
 ---
@@ -469,8 +602,8 @@ The Home footer also links to `tracking.html`, `train-list.html`, `coach.html`, 
   - Train cards on success.
   - *No trains found* for an empty result.
   - *Unable to load trains* if the backend can't be reached.
-  - A sample-data notice when the data is fallback data.
-- **Each train card** shows the number, name, route, departure and arrival times, and travel time, with links to **Live Status** (`tracking.html?train=…`) and **Coach Position** (`coach.html?train=…`).
+  - A notice when the data comes from the saved timetables or is sample data.
+- **Each train card** shows the number, name, route, departure and arrival times, running days and travel time, with links to **Live Status** (`tracking.html?train=…`) and **Coach Position** (`coach.html?train=…`).
 - Swap and clear (×) buttons. The *Track Train* tab opens `tracking.html`, and the header title links Home.
 - The address bar is updated after each search, so the URL can be shared.
 
@@ -478,8 +611,8 @@ The Home footer also links to `tracking.html`, `train-list.html`, `coach.html`, 
 
 - Enter a train number; the field is required. With `?train=12626`, the search runs automatically.
 - Calls `GET /api/trains/spot/:query`.
-- **Shows:** train name and number, current status, source, destination, current location, delay ("On Time" or "N minutes late"), and a schedule table (station, arrival, departure, platform).
-- Loading and error messages, a sample-data notice for fallback data, and a **View Coach Position** link.
+- **Shows:** train name and number, current status, source, destination, current location, delay ("On Time", "N minutes late", or "N/A" for saved timetables), and a schedule table (station, arrival, departure, platform).
+- Loading and error messages, a notice saying whether the data is a saved timetable or sample data, and a **View Coach Position** link.
 
 #### Coach Position — `coach.html` + `coach.css` + `coach.js`
 
@@ -501,10 +634,18 @@ The Home footer also links to `tracking.html`, `train-list.html`, `coach.html`, 
 #### Help Desk — `helpdesk.html` + `css/helpdesk.css` + `js/helpdesk.js`
 
 - A search box that filters the help-topic cards as you type, with a "no topics" message when nothing matches.
-- Topic cards, feedback, social icons and the "Live Train Map" button show a *"coming soon"* toast message.
+- **Help topics:**
+  - Clicking a card (or pressing Enter or Space on it) opens a dialog that explains how to use that feature of this app, with links to the right page.
+  - The six topics: Train Running Status, PNR Status (including what CNF / RAC / WL mean), Train Schedule, Platform & Station Info, Account & Profile, and App & Website Issues.
+  - Close the dialog with ×, the Escape key, or by clicking outside it.
+- **Feedback form:**
+  - *Give Feedback* (or the link in "App & Website Issues") opens a form with name, email, category and message.
+  - It is checked in the browser, then sent to `POST /api/feedback` and saved in MongoDB.
+  - The result appears in the form: success, a validation message, or "Unable to reach the server".
 - *Contact Support* opens an email to `support@whereismytrain.in`.
+- Social icons and the "Live train map" button show a *"coming soon"* toast message.
 - Mobile menu, and links back to Home.
-- Works on its own. It does not call the backend.
+- The help topics work without the backend; only the feedback form needs it.
 
 #### Classic tracker — `index-legacy.html` + `style.css` + `script.js`
 
@@ -521,9 +662,17 @@ The Home footer also links to `tracking.html`, `train-list.html`, `coach.html`, 
 | `tracking.html` | `train` | `tracking.html?train=12626` |
 | `coach.html` | `train` (or `trainNumber`), optional `trainName` | `coach.html?train=12626` |
 
-### Backend URL
+### Backend URL (shared config)
 
-Every page calls `http://localhost:5000`. To use a different host or port, change it in `js/home.js`, `train-list.js`, `js/tracking.js`, `coach.js` and `script.js`.
+Every page loads [`js/config.js`](frontend/js/config.js) before its own script:
+
+```js
+window.APP_CONFIG = {
+  API_BASE_URL: 'http://localhost:5000'
+};
+```
+
+Each page script reads `window.APP_CONFIG.API_BASE_URL`, falling back to `http://localhost:5000` if the file is missing. To point the frontend at another host or port (for example after deploying the backend), change this one line.
 
 ---
 
@@ -538,7 +687,7 @@ These results come from calling the configured API (`irctc-indian-railway-pnr-st
 | `GET /getTrainStatus` | `/api/trains/spot/:query` | ❌ `404 Endpoint does not exist` → sample data |
 | `GET /getTrainsBetweenStations` | `/api/trains/between/:from/:to` | ❌ `404 Endpoint does not exist` → sample data |
 
-For real live status or trains-between data, subscribe to a RapidAPI plan or API that offers those endpoints. Then update the URLs and the field mapping in `server.js`. The frontend already reads several field-name variants.
+Until then, these two routes use the saved timetables in MongoDB (see [Live data vs. fallback data](#live-data-vs-fallback-data)). For real live status or trains-between data, subscribe to a RapidAPI plan or API that offers those endpoints. Then update the URLs and the field mapping in `server.js`. The frontend already reads several field-name variants.
 
 ---
 
@@ -549,35 +698,41 @@ For real live status or trains-between data, subscribe to a RapidAPI plan or API
 With the server running:
 
 ```bash
-curl http://localhost:5000/api/trains/spot/12626
-curl http://localhost:5000/api/trains/between/QLN/ERS
-curl http://localhost:5000/api/trains/coach/12626
-curl http://localhost:5000/api/pnr/1234567890        # → success:false, "PNR not yet generated"
-curl http://localhost:5000/api/pnr/12ab              # → 400 validation error
+curl http://localhost:5000/api/trains/spot/16301          # saved timetable (X-Data-Source: database)
+curl http://localhost:5000/api/trains/spot/99999          # unknown train → sample data (fallback)
+curl http://localhost:5000/api/trains/between/QLN/ERS     # 3 saved trains
+curl http://localhost:5000/api/trains/between/ERS/QLN     # [] – no saved train in that direction
+curl http://localhost:5000/api/trains/coach/12626         # live coach order
+curl http://localhost:5000/api/pnr/1234567890             # → success:false, "PNR not yet generated"
+curl http://localhost:5000/api/pnr/12ab                   # → 400 validation error
 curl http://localhost:5000/api/history
+curl http://localhost:5000/api/nope                       # → JSON 404
+curl -X POST http://localhost:5000/api/feedback -H "Content-Type: application/json" -d '{"message":"hi"}'   # → 400
 ```
 
-Add `-i` to see the `X-Data-Source` header, e.g. `curl -i http://localhost:5000/api/trains/spot/12626`.
+Add `-i` to see the `X-Data-Source` header, e.g. `curl -i http://localhost:5000/api/trains/spot/16301`.
 
 ### 2. Frontend checklist
 
 | # | Steps | Expected result |
 |---|---|---|
-| 1 | Open `index.html`, type `Kollam` in *From*, pick the suggestion, type `ERS` in *To*, click **Search** | Opens the train list with 2 train cards and a sample-data notice |
-| 2 | Click **Live Status** on a card | The tracking page loads the train's status and schedule automatically |
-| 3 | Click **View Coach Position** | The coach page shows the real coach order (e.g. 23 coaches for 12626) |
+| 1 | Open `index.html`, type `Kollam` in *From*, pick the suggestion, type `ERS` in *To*, click **Search** | The train list shows 3 trains (Venad, Jan Shatabdi, Mangaluru Exp) and a "saved timetables" notice |
+| 2 | Click **Live Status** on the Venad Express card | The tracking page shows its 9-stop schedule with a "saved timetable" notice |
+| 3 | Click **View Coach Position** | The coach page shows the real coach order from RapidAPI (23 coaches) |
 | 4 | Click a sleeper coach, then the engine | Sleeper berth layout, then "Layout not available" |
 | 5 | Open `coach.html` with no parameters | Sample rake GEN/A1/B1–B6/S1–S9 |
-| 6 | Home → PNR tab, enter `123` | "Please enter a valid 10-digit PNR number." |
-| 7 | Enter `1234567890` | The API's message (PNR not generated) |
-| 8 | Home → Coach Position tab, enter `12626` | Opens `coach.html?train=12626` |
-| 9 | Click the **?** icon | The Help Desk opens; typing in the search filters the topics |
-| 10 | Stop the backend and search again on the train list | "Unable to load trains … backend server is running" |
-| 11 | Call `/api/history` | The searches above are listed (PNR masked) |
+| 6 | Search `ERS` → `QLN` on the train list | "No trains found" (no saved train runs that way) |
+| 7 | Open `tracking.html?train=99999` | Sample data, with a "sample data" notice |
+| 8 | Home → PNR tab, enter `123`, then `1234567890` | "Please enter a valid 10-digit PNR number.", then the API's message (PNR not generated) |
+| 9 | Home → Coach Position tab, enter `12626` | Opens `coach.html?train=12626` |
+| 10 | Click the **?** icon, then the *PNR Status* topic card | The Help Desk opens, and a dialog explains PNR status codes |
+| 11 | Help Desk → *Give Feedback*, send `hi`, then a longer message | "at least 5 characters", then "Thank you! Your feedback has been received." (check the `feedbacks` collection in Atlas) |
+| 12 | Stop the backend and search again on the train list | "Unable to load trains … backend server is running" |
+| 13 | Call `/api/history` | The searches above are listed (PNR masked) |
 
 Open the browser DevTools (F12) → **Console** and **Network**: there should be no red errors while the backend is running.
 
-The final integration was checked with an automated headless-Chrome run of these flows: 48 of 48 checks passed, with no console errors, script errors or failed requests.
+These flows were also checked with an automated headless-Chrome run: 57 of 57 checks passed, with no console errors, script errors or failed requests on any page.
 
 ---
 
@@ -585,7 +740,9 @@ The final integration was checked with an automated headless-Chrome run of these
 
 | Problem | Cause and fix |
 |---|---|
-| `Error: listen EADDRINUSE :::5000` | Something else is already using port 5000, often an old `node server.js`. Stop it, or change `PORT` (then also change `API_BASE_URL` in the frontend). |
+| `❌ Port 5000 is already in use` | Another program, often an old `node server.js`, is using port 5000. Stop it (close its terminal, or end the `node.exe` process in Task Manager), or change `PORT` in `.env` and `API_BASE_URL` in `frontend/js/config.js`. |
+| Train list says "showing sample trains" for every route | The `trains` collection is empty. Run `npm run seed` in `backend/`. |
+| Feedback says "can't be saved right now" | MongoDB is not connected (check the server console). |
 | `⚠️ Warning: MONGO_URI is missing` | `backend/.env` is missing, or has no `MONGO_URI`. Run the server from the `backend/` folder. |
 | `❌ MongoDB Atlas Connection Error` | Wrong username or password in the URI, or your IP is not allowed. In Atlas, go to **Network Access** and add your current IP. |
 | `/api/history` returns `500` | MongoDB is not connected (see above). |
@@ -593,7 +750,7 @@ The final integration was checked with an automated headless-Chrome run of these
 | PNR says "service is unavailable" | RapidAPI rejected the request (bad key, quota, or network). Check the server console. |
 | Every page says "make sure the backend is running" | Start `node server.js` in `backend/` and keep that terminal open. |
 | `Cannot find module 'express'` | Run `npm install` inside `backend/`. |
-| Status or train list always shows "sample data" | Expected with the current RapidAPI plan; see [Which RapidAPI endpoints work](#which-rapidapi-endpoints-work). |
+| Status or train list shows "saved timetables" instead of live data | Expected with the current RapidAPI plan; see [Which RapidAPI endpoints work](#which-rapidapi-endpoints-work). |
 
 ---
 
@@ -602,7 +759,10 @@ The final integration was checked with an automated headless-Chrome run of these
 - **Never commit `backend/.env`.** It is listed in `.gitignore`. Share credentials privately, not through git.
 - The RapidAPI key is used **only on the server**. The browser never sees it.
 - PNR numbers are masked before they are stored in MongoDB.
+- Feedback (which may include an email address) is stored in MongoDB, but no API route returns it.
+- Request bodies are limited to 10 KB, and all feedback fields are validated and length-limited.
 - Values from the API are HTML-escaped before they are inserted into the page (Home PNR result, train list and tracking page).
+- Errors are returned as short JSON messages. Stack traces are only printed on the server.
 - An earlier version of the repository committed `backend/.env`. Those credentials are still visible in the git history, so they must be **rotated**: change the Atlas database user's password and generate a new RapidAPI key.
 - CORS allows every origin, and there is no authentication or rate limiting. That is fine for local development, but restrict it before any public deployment.
 
@@ -651,10 +811,9 @@ git push origin feature/<short-name>
 
 ## Known Limitations and Future Work
 
-- Live running status and trains-between-stations use sample data, until an API plan that supports them is configured.
+- Live running status and trains-between-stations use the saved sample timetables (7 trains, approximate times) until an API plan that supports them is configured. There is no live train position or delay.
 - The PNR success view reads the most likely field names and has not yet been checked against a real, valid PNR response.
 - The station autocomplete lists are small built-in lists, not a full station database.
 - The coach view only draws layouts for General, Sleeper, AC 2-tier and AC 3-tier coaches.
-- The backend URL (`http://localhost:5000`) is hard-coded in each frontend script.
-- `frontend/app.js` and the root `package.json` are leftovers and could be removed.
-- Ideas: a live map, arrival alarms, saved favourite trains, a Help Desk feedback form (would use the existing `express.json()` middleware with a `POST` route), and deployment (e.g. Render for the backend, Netlify for the frontend).
+- Feedback can only be read in MongoDB Atlas; there is no admin page.
+- Ideas: a live map, arrival alarms, saved favourite trains, an admin view for feedback (behind a login), and deployment (e.g. Render for the backend, Netlify for the frontend; update `frontend/js/config.js` to the deployed URL).

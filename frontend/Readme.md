@@ -37,7 +37,8 @@ Here is a list of every single toy in our software toolbox:
 | **`train-list.html`** | Shows all trains between two stations (`train-list.html?from=QLN&to=ERS`). 🚉 |
 | **`tracking.html`** | Live running status and schedule of one train (`tracking.html?train=12626`). 📍 |
 | **`coach.html`** | The special page that shows train coaches and seat maps (`coach.html?train=12626`)! 🚃 |
-| **`helpdesk.html`** | The helper page for answering common passenger questions! 🙋‍♂️ |
+| **`helpdesk.html`** | The helper page for answering common passenger questions, with a feedback form that saves your message! 🙋‍♂️ |
+| **`js/config.js`** | One tiny settings file that tells every page where the backend lives (`http://localhost:5000`). ⚙️ |
 | **`css/home.css`** | The main paint bucket! Gives the website nice fonts, spacing, and page layouts. 🎨 |
 | **`style.css`** | The extra styling sheet that controls header colors, timeline tracks, and night mode! 🖌️ |
 | **`js/home.js`** | The brain behind the screens! Makes buttons click, tabs switch, and searches work. 🧠 |
@@ -51,11 +52,11 @@ You don't need any supercomputers or heavy installations to run this!
 1. **Download the project** to your computer.
 2. **Start the backend** (it talks to RapidAPI and MongoDB Atlas):
    * Copy `backend/.env.example` to `backend/.env` and fill in your own keys (never commit `.env`!).
-   * In the `backend` folder run `npm install`, then `node server.js`.
+   * In the `backend` folder run `npm install`, then `npm run seed` (first time only, loads sample timetables), then `npm start`.
    * The server runs on `http://localhost:5000` with these routes:
-     `/api/trains/spot/:train`, `/api/trains/between/:from/:to`, `/api/trains/coach/:train`, `/api/pnr/:pnr`, `/api/history`.
+     `/api/trains/spot/:train`, `/api/trains/between/:from/:to`, `/api/trains/coach/:train`, `/api/pnr/:pnr`, `/api/history`, and `POST /api/feedback`.
    * Coach position and PNR status come live from RapidAPI. Live running status and trains-between-stations
-     are not offered by the current RapidAPI plan, so those pages show clearly labelled sample data.
+     are not offered by the current RapidAPI plan, so those pages show saved timetables from MongoDB (clearly labelled).
 3. Find the file named **`index.html`**.
 4. **Double-click it!** It will open right in your web browser (like Google Chrome or Safari).
 5. Click on the top tabs to switch between **Search Train**, **PNR Status**, and **Coach Position**.
