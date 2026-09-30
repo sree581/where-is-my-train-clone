@@ -74,6 +74,9 @@
         const target = tab.dataset.tab;
         const form = $(`#${target}-form`);
         if (form) form.classList.add('active');
+        // Keep the URL (index.html#pnr-status) and the shared nav bar in sync with the open tab
+        history.replaceState(null, '', target === 'find-trains' ? location.pathname + location.search : `#${target}`);
+        window.dispatchEvent(new Event('wimt:navchange'));
         // Hide any open results
         hideAllResults();
       });

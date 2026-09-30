@@ -43,6 +43,57 @@ body {
     color: #555;
 }
 
+/* Train number search (reloads coach.html?train=NNNNN) */
+
+.coach-search {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+}
+
+.coach-search input {
+    width: 170px;
+    padding: 9px 12px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.coach-search input:focus {
+    outline: none;
+    border-color: #1a73e8;
+}
+
+.coach-search button {
+    padding: 9px 14px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #fff;
+    background: #1a73e8;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.coach-search button:hover {
+    background: #1558b0;
+}
+
+@media (max-width: 640px) {
+    .header {
+        flex-wrap: wrap;
+    }
+
+    .coach-search {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .coach-search input {
+        flex: 1;
+    }
+}
+
 
 /* COACH SELECTOR */
 

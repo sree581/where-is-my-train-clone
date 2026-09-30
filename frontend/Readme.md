@@ -53,13 +53,14 @@ You don't need any supercomputers or heavy installations to run this!
 2. **Start the backend** (it talks to RapidAPI and MongoDB Atlas):
    * Copy `backend/.env.example` to `backend/.env` and fill in your own keys (never commit `.env`!).
    * In the `backend` folder run `npm install`, then `npm run seed` (first time only, loads sample timetables), then `npm start`.
+   * Open **http://localhost:5000** in your browser. The backend shows the whole website, and every page has the same menu bar at the top. 🧭
    * The server runs on `http://localhost:5000` with these routes:
      `/api/trains/spot/:train`, `/api/trains/between/:from/:to`, `/api/trains/coach/:train`, `/api/pnr/:pnr`, `/api/history`, and `POST /api/feedback`.
    * Coach position and PNR status come live from RapidAPI. Live running status and trains-between-stations
      are not offered by the current RapidAPI plan, so those pages show saved timetables from MongoDB (clearly labelled).
-3. Find the file named **`index.html`**.
-4. **Double-click it!** It will open right in your web browser (like Google Chrome or Safari).
-5. Click on the top tabs to switch between **Search Train**, **PNR Status**, and **Coach Position**.
+3. *(Other way)* You can also find **`index.html`** in the `frontend` folder and **double-click it!** The backend still has to be running.
+4. Use the menu bar at the top to jump between Home, Find Trains, Live Status, Coach Position, PNR Status and Help.
+5. On the Home page, click on the top tabs to switch between **Search Train**, **PNR Status**, and **Coach Position**.
 6. Click the `?` icon on the top-right header anytime you want to visit the Help Desk! 🆘
 
 ---

@@ -4,7 +4,13 @@ A railway information web app inspired by the *Where Is My Train* app, built as 
 
 Users can search trains between two stations, check the running status and schedule of a train, see the coach position (coach order) of a train, check PNR status, and get help (and send feedback) from a Help Desk page.
 
+**Run it:** `cd backend` → `npm install` → `npm start` → open **http://localhost:5000**. The full steps are in [Getting Started](#getting-started).
+
 ```
+Browser ──http://localhost:5000──▶  Express backend (Node.js)
+                                     ├── serves the website (frontend/ HTML, CSS, JS)
+                                     └── /api/... routes
+
 Frontend (HTML / CSS / JavaScript)  ──fetch()──▶  Express backend (Node.js)  ──axios──▶  RapidAPI (IRCTC API)
                                                         │
                                                         └──mongoose──▶  MongoDB Atlas
@@ -104,8 +110,11 @@ where-is-my-train-clone/
 │   ├── .env.example           # template for your .env (no real secrets)
 │   └── .env                   # YOUR secrets. Not committed; create it yourself.
 │
-└── frontend/
-    ├── js/config.js           # shared settings: the backend URL (API_BASE_URL). Loaded by every page.
+└── frontend/                  # served by the backend at http://localhost:5000
+    ├── js/config.js           # backend URL (API_BASE_URL) for when pages are opened as files; loaded by every page
+    ├── js/nav.js              # shared navigation bar, added to the top of every page
+    ├── css/nav.css            # styles for the navigation bar
+    ├── favicon.svg            # browser-tab icon (🚆)
     │
     ├── index.html             # Home page: Search Train / PNR Status / Coach Position tabs
     ├── css/home.css           # Home page styles (also used by helpdesk.html)
@@ -189,7 +198,7 @@ This fills the `trains` collection with 7 sample timetables. The server uses the
 
 Good routes to try: `QLN → ERS`, `TVC → CLT`, `ERS → MAQ`, `NDLS → TVC`.
 
-### 5. Start the backend
+### 5. Start the app
 
 ```bash
 npm start            # same as: node server.js
@@ -199,23 +208,28 @@ You should see:
 
 ```
 🚀 Server running on http://localhost:5000
+🌐 Open the website: http://localhost:5000
 ✅ Connected to MongoDB Atlas successfully!
 ```
 
-Keep this terminal open while you use the app. If you see `❌ Port 5000 is already in use`, another copy of the server is still running; stop it first.
+### 6. Open the website
 
-### 6. Open the frontend
+Go to **http://localhost:5000** in your browser.
 
-Open `frontend/index.html` in your browser. Double-clicking it works, because the pages are opened directly as files and need no web server.
+The backend serves **both** the website and the API from this one address, so there is no separate frontend command. There is no `npm run dev`: the frontend is plain HTML/CSS/JS with nothing to build. Every page has the same navigation bar at the top (Home · Find Trains · Live Status · Coach Position · PNR Status · Help).
 
-If you prefer serving the pages over HTTP, any static server works, for example the VS Code **Live Server** extension or `npx serve frontend`. The backend allows every origin through CORS, so both ways work.
+Keep the terminal open while you use the app. Press `Ctrl + C` in it to stop the server. After changing backend code, stop it and run `npm start` again. After changing frontend files, just refresh the browser.
+
+If you see `❌ Port 5000 is already in use`, another copy of the server is still running (for example in another terminal). Stop that one first.
+
+**Other ways to open the pages** (optional): you can also double-click `frontend/index.html`, or use the VS Code **Live Server** extension. The pages then call the API at `http://localhost:5000` (set in `frontend/js/config.js`), so the backend must still be running. CORS allows this.
 
 ### npm scripts (run inside `backend/`)
 
 | Command | What it does |
 |---|---|
 | `npm install` | Installs the dependencies from `package.json` |
-| `npm start` | Starts the API server (`node server.js`) |
+| `npm start` | Starts the server: website + API on http://localhost:5000 (`node server.js`) |
 | `npm run seed` | Replaces the `trains` collection with the sample timetables (`node seed.js`) |
 
 ---
@@ -246,7 +260,7 @@ All backend code is in [`backend/server.js`](backend/server.js).
 
 1. `require('dotenv').config()` reads `backend/.env` into `process.env`.
 2. The `Train` and `Feedback` models are loaded from `models/`.
-3. An Express app is created, and the request [middleware](#middleware) is registered.
+3. An Express app is created, and the request [middleware](#middleware) is registered, including serving the `frontend/` folder.
 4. The configuration is read: `PORT`, `RAPIDAPI_KEY`, `RAPIDAPI_HOST`, `MONGO_URI`.
 5. `mongoose.connect(MONGO_URI)` starts connecting to MongoDB Atlas **in the background**, without blocking.
 6. The `SearchHistory` schema and model are defined, along with the helpers that read saved timetables.
@@ -261,25 +275,26 @@ Because the database connection does not block startup, the API can answer reque
 Middleware is a function that runs on a request before (or instead of) a route handler. Express runs them **in the order they are registered**. A request goes through this chain from top to bottom:
 
 ```
-request ─▶ 1 CORS ─▶ 2 JSON body parser ─▶ 3 routes ─▶ 4 /api 404 handler ─▶ response
-                              │                  │
-                              └─── any error ────┴──────▶ 5 error handler ─▶ JSON error response
+request ─▶ 1 CORS ─▶ 2 JSON body parser ─▶ 3 website files ─▶ 4 API routes ─▶ 5 /api 404 handler ─▶ response
+                              │                                     │
+                              └────────────── any error ────────────┴──────▶ 6 error handler ─▶ JSON error response
 ```
 
 | # | Middleware | Code | What it does | Why the project needs it |
 |---|---|---|---|---|
 | 1 | **CORS** | `app.use(cors({ exposedHeaders: ['X-Data-Source'] }))` | Adds `Access-Control-Allow-Origin: *` to every response and answers browser pre-flight `OPTIONS` requests (needed before the feedback `POST`). It also adds `Access-Control-Expose-Headers: X-Data-Source`. | The frontend runs on a different origin (`file://` or another port) than the API (`http://localhost:5000`). Without CORS the browser would block every `fetch()`. Browsers hide custom response headers from JavaScript by default, so the expose setting is what lets the pages read `X-Data-Source`. |
-| 2 | **JSON body parser** | `app.use(express.json({ limit: '10kb' }))` | Parses requests with `Content-Type: application/json` into `req.body`. Bodies over 10 KB are rejected with `413`, and malformed JSON with `400`; both errors are passed on to the error handler (#5). | `POST /api/feedback` reads the form data from `req.body`. The size limit stops oversized requests from being processed. |
-| 3 | **Routes** | `app.get(...)`, `app.post(...)` | Matches the method and path and fills `req.params` from `:placeholders`. | The endpoints in the [API reference](#api-reference). |
-| 4 | **JSON 404 for the API** | `app.use('/api', (req, res) => …)` | Runs only when no route above matched a path starting with `/api`, and answers `404 { success: false, message: "No API route for GET /api/…" }`. | The frontend always expects JSON. Without this, Express would answer with an HTML "Cannot GET" page. |
-| 5 | **Error handler** | `app.use((err, req, res, next) => …)` | Catches errors passed down the chain: `400` "Invalid request body", `413` "Request body is too large", anything else `500` "Internal server error" (and prints it on the server). | Returns every error as JSON and never leaks stack traces to the browser. Express only treats a middleware as an error handler if it takes **all four** arguments, which is why `next` is declared even though it isn't used. Express 5 also sends rejected `async` route handlers here automatically. |
+| 2 | **JSON body parser** | `app.use(express.json({ limit: '10kb' }))` | Parses requests with `Content-Type: application/json` into `req.body`. Bodies over 10 KB are rejected with `413`, and malformed JSON with `400`; both errors are passed on to the error handler (#6). | `POST /api/feedback` reads the form data from `req.body`. The size limit stops oversized requests from being processed. |
+| 3 | **Website files** | `app.get('/js/config.js', …)` then `app.use(express.static(FRONTEND_DIR))` | `express.static` sends files from the `frontend/` folder (`/` → `index.html`, `/css/nav.css`, …). Just before it, a small route answers `/js/config.js` with `API_BASE_URL: window.location.origin`, so pages served by the backend call the API on the same address. | This is what joins the frontend and backend: one `npm start`, one URL. Only `frontend/` is served; `backend/` files such as `.env` and `server.js` can't be reached, and hidden dot-files are ignored. |
+| 4 | **API routes** | `app.get(...)`, `app.post(...)` | Matches the method and path and fills `req.params` from `:placeholders`. | The endpoints in the [API reference](#api-reference). |
+| 5 | **JSON 404 for the API** | `app.use('/api', (req, res) => …)` | Runs only when no route above matched a path starting with `/api`, and answers `404 { success: false, message: "No API route for GET /api/…" }`. | The frontend always expects JSON. Without this, Express would answer with an HTML "Cannot GET" page. Unknown non-API paths (e.g. `/nope.html`) still get Express's default HTML 404. |
+| 6 | **Error handler** | `app.use((err, req, res, next) => …)` | Catches errors passed down the chain: `400` "Invalid request body", `413` "Request body is too large", anything else `500` "Internal server error" (and prints it on the server). | Returns every error as JSON and never leaks stack traces to the browser. Express only treats a middleware as an error handler if it takes **all four** arguments, which is why `next` is declared even though it isn't used. Express 5 also sends rejected `async` route handlers here automatically. |
 
 **Not middleware, but related:**
 
 - **`dotenv`** is a configuration loader. It runs once at startup, not on each request.
 - **Search-history logging** is done **inside each route** rather than as a global middleware. That way each route decides what to record (for example, the PNR route masks the PNR before saving it). Logging is *fire-and-forget*: `SearchHistory.create(...)` is not awaited, so a slow database write never delays the response, and failures are only printed to the console.
 - **Input validation** is also done inside the routes: the PNR format check, and the feedback message and email checks, backed by the Mongoose schema rules.
-- **Static files** are not served by Express. The frontend is opened as plain files, separately from the API.
+- **CORS is still needed** even though the backend serves the website. It lets the pages work when they are opened some other way (double-clicked, or VS Code Live Server).
 - There is **no authentication and no rate limiting**. The API is meant for local development.
 
 ### MongoDB connection and models
@@ -573,6 +588,24 @@ The **coach position** and **PNR** routes use real data only. They do not fall b
 
 The Home footer also links to `tracking.html`, `train-list.html`, `coach.html`, `helpdesk.html` and the classic tracker `index-legacy.html`.
 
+### Shared navigation bar
+
+[`js/nav.js`](frontend/js/nav.js) and [`css/nav.css`](frontend/css/nav.css) add the same dark-blue bar to the top of **every** page, so you can reach any feature from anywhere:
+
+| Link | Opens | Highlighted on |
+|---|---|---|
+| 🏠 Home | `index.html` | Home (Search Train / Coach Position tabs) |
+| 🔍 Find Trains | `train-list.html` | Train List |
+| 📍 Live Status | `tracking.html` (+ `?train=` if the page has one) | Live Status, Classic tracker |
+| 🚃 Coach Position | `coach.html` (+ `?train=` if the page has one) | Coach Position |
+| 🎫 PNR Status | `index.html#pnr-status` | Home when the PNR tab is open |
+| ❓ Help | `helpdesk.html` | Help Desk |
+
+- **The train carries over.** On `tracking.html?train=16301`, the Coach Position link points to `coach.html?train=16301`, and the other way round, so you can switch between a train's status and its coaches in one click.
+- **Home tabs stay in sync.** When you switch tabs on Home, `js/home.js` updates the URL (`#pnr-status`) and sends a `wimt:navchange` event, so the highlight follows the tab you're on.
+- On narrow screens the brand text is hidden and the links scroll sideways.
+- Class names start with `wimt-` so they don't clash with any page's own styles.
+
 ### Pages
 
 #### Home — `index.html` + `css/home.css` + `js/home.js`
@@ -616,7 +649,8 @@ The Home footer also links to `tracking.html`, `train-list.html`, `coach.html`, 
 
 #### Coach Position — `coach.html` + `coach.css` + `coach.js`
 
-- Reads `?train=` (or `?trainNumber=` and `?trainName=`).
+- Reads `?train=` (or `?trainNumber=` and `?trainName=`). You can also type a 5-digit train number in the **search box** at the top right and click **Show Coaches**.
+- Opens on the first coach that has a seat layout, rather than the engine.
 - Calls `GET /api/trains/coach/:trainNo` and shows the **real coach order** in a horizontal selector (engine icon, then each coach with its position number).
 - Clicking a coach shows its seat layout:
 
@@ -664,15 +698,12 @@ The Home footer also links to `tracking.html`, `train-list.html`, `coach.html`, 
 
 ### Backend URL (shared config)
 
-Every page loads [`js/config.js`](frontend/js/config.js) before its own script:
+Every page loads `js/config.js`, then `js/nav.js`, then its own script. Each page script reads `window.APP_CONFIG.API_BASE_URL`, falling back to `http://localhost:5000` if it isn't set.
 
-```js
-window.APP_CONFIG = {
-  API_BASE_URL: 'http://localhost:5000'
-};
-```
-
-Each page script reads `window.APP_CONFIG.API_BASE_URL`, falling back to `http://localhost:5000` if the file is missing. To point the frontend at another host or port (for example after deploying the backend), change this one line.
+| How the page was opened | Where `js/config.js` comes from | `API_BASE_URL` |
+|---|---|---|
+| From the backend, e.g. `http://localhost:5000/tracking.html` (recommended) | Generated by the backend route `GET /js/config.js` | `window.location.origin`, the same server. This works on any `PORT`, and from another device via your PC's IP address. |
+| Double-clicked file, or VS Code Live Server | The real file [`frontend/js/config.js`](frontend/js/config.js) | `'http://localhost:5000'`. Edit this line if your backend runs elsewhere. |
 
 ---
 
@@ -716,7 +747,8 @@ Add `-i` to see the `X-Data-Source` header, e.g. `curl -i http://localhost:5000/
 
 | # | Steps | Expected result |
 |---|---|---|
-| 1 | Open `index.html`, type `Kollam` in *From*, pick the suggestion, type `ERS` in *To*, click **Search** | The train list shows 3 trains (Venad, Jan Shatabdi, Mangaluru Exp) and a "saved timetables" notice |
+| 0 | Open **http://localhost:5000**, then click every link in the top navigation bar | Each page opens with its link highlighted |
+| 1 | On Home, type `Kollam` in *From*, pick the suggestion, type `ERS` in *To*, click **Search** | The train list shows 3 trains (Venad, Jan Shatabdi, Mangaluru Exp) and a "saved timetables" notice |
 | 2 | Click **Live Status** on the Venad Express card | The tracking page shows its 9-stop schedule with a "saved timetable" notice |
 | 3 | Click **View Coach Position** | The coach page shows the real coach order from RapidAPI (23 coaches) |
 | 4 | Click a sleeper coach, then the engine | Sleeper berth layout, then "Layout not available" |
@@ -732,7 +764,7 @@ Add `-i` to see the `X-Data-Source` header, e.g. `curl -i http://localhost:5000/
 
 Open the browser DevTools (F12) → **Console** and **Network**: there should be no red errors while the backend is running.
 
-These flows were also checked with an automated headless-Chrome run: 57 of 57 checks passed, with no console errors, script errors or failed requests on any page.
+These flows were also checked with an automated headless-Chrome run, both with the site served by the backend and with the pages opened as files. Each run passed 85 of 85 checks, with no console errors, script errors or failed requests on any page. The checks included the navigation bar on every page and a full Find Trains → Live Status → Coach Position journey using only the nav bar.
 
 ---
 
@@ -748,7 +780,9 @@ These flows were also checked with an automated headless-Chrome run: 57 of 57 ch
 | `/api/history` returns `500` | MongoDB is not connected (see above). |
 | Coach page always shows the sample layout | The backend isn't running, or the RapidAPI key is invalid or out of quota. Check the server console for `Coach Position API Error`. |
 | PNR says "service is unavailable" | RapidAPI rejected the request (bad key, quota, or network). Check the server console. |
-| Every page says "make sure the backend is running" | Start `node server.js` in `backend/` and keep that terminal open. |
+| Every page says "make sure the backend is running" | Start `npm start` in `backend/` and keep that terminal open. |
+| `http://localhost:5000` says "Cannot GET /" | An old copy of the server (from before the website was served by the backend) is still running. Stop it and run `npm start` again. |
+| A change to a page doesn't show up | Refresh the browser (`Ctrl + F5` for a hard refresh). Backend changes need a server restart. |
 | `Cannot find module 'express'` | Run `npm install` inside `backend/`. |
 | Status or train list shows "saved timetables" instead of live data | Expected with the current RapidAPI plan; see [Which RapidAPI endpoints work](#which-rapidapi-endpoints-work). |
 

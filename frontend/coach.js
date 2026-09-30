@@ -6,6 +6,11 @@ const trainName = params.get("trainName");
 
 const trainTitle = document.getElementById("train-title");
 
+// Show the current train in the search box
+if (trainNumber) {
+    document.getElementById("coach-search-input").value = trainNumber;
+}
+
 if (trainNumber && trainName) {
     trainTitle.textContent = `${trainNumber} - ${trainName}`;
 } else if (trainNumber) {
@@ -439,7 +444,8 @@ async function loadCoachData() {
             throw new Error("No coaches found");
         }
 
-        selected = 0;
+        // Start on the first coach that has a seat layout (not the engine)
+        selected = Math.max(0, coaches.findIndex((coach) => coach.layout !== "unavailable"));
 
         updateHeader();
         renderSelector();

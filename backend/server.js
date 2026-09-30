@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
@@ -10,6 +11,18 @@ const app = express();
 // X-Data-Source tells the frontend whether it got live RapidAPI data or the sample fallback
 app.use(cors({ exposedHeaders: ['X-Data-Source'] }));
 app.use(express.json({ limit: '10kb' }));
+
+// Serve the website itself, so http://localhost:5000 opens frontend/index.html.
+// When the pages come from this server, the API is on the same address, so the
+// frontend settings file is generated here instead of reading frontend/js/config.js
+// (that file is only used when the pages are opened some other way, e.g. double-clicked).
+const FRONTEND_DIR = path.join(__dirname, '..', 'frontend');
+app.get('/js/config.js', (req, res) => {
+    res.type('application/javascript')
+        .set('Cache-Control', 'no-store')
+        .send('window.APP_CONFIG = { API_BASE_URL: window.location.origin };\n');
+});
+app.use(express.static(FRONTEND_DIR));
 
 const PORT = process.env.PORT || 5000;
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
@@ -373,4 +386,5 @@ app.listen(PORT, (err) => {
         process.exit(1);
     }
     console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`🌐 Open the website: http://localhost:${PORT}`);
 });
