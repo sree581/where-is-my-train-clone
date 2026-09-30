@@ -5,7 +5,8 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 
 const app = express();
-app.use(cors());
+// X-Data-Source tells the frontend whether it got live RapidAPI data or the sample fallback
+app.use(cors({ exposedHeaders: ['X-Data-Source'] }));
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
@@ -57,12 +58,12 @@ app.get('/api/trains/spot/:query', async (req, res) => {
             }
         });
 
-        res.json(response.data);
+        res.set('X-Data-Source', 'live').json(response.data);
     } catch (err) {
         console.error("Spot Train API Error:", err.response?.data || err.message);
-        
+
         // Fallback mock payload for offline testing/presentation
-        res.json({
+        res.set('X-Data-Source', 'fallback').json({
             trainNumber: query,
             trainName: "KERALA EXPRESS",
             source: "NDLS",
@@ -109,8 +110,10 @@ app.get('/api/trains/between/:from/:to', async (req, res) => {
 
         const rawData = response.data;
         let list = rawData?.data || rawData?.trains || (Array.isArray(rawData) ? rawData : []);
+        let dataSource = 'live';
 
         if (!Array.isArray(list) || list.length === 0) {
+            dataSource = 'fallback';
             list = [
                 { train_number: "12626", train_name: "KERALA EXPRESS", departure_time: "20:10", arrival_time: "18:00", duration: "45h 50m" },
                 { train_number: "12618", train_name: "MANGALA LAKSHADWEEP EXP", departure_time: "05:40", arrival_time: "10:25", duration: "50h 45m" }
@@ -125,11 +128,11 @@ app.get('/api/trains/between/:from/:to', async (req, res) => {
             travelTime: t.travel_time || t.duration || 'N/A'
         }));
 
-        res.json(trainList);
+        res.set('X-Data-Source', dataSource).json(trainList);
     } catch (err) {
         console.error("Between Stations API Error:", err.response?.data || err.message);
-        
-        res.json([
+
+        res.set('X-Data-Source', 'fallback').json([
             { trainNumber: "12626", trainName: "KERALA EXPRESS", departureTime: "20:10", arrivalTime: "18:00", travelTime: "45h 50m" },
             { trainNumber: "12618", trainName: "MANGALA LAKSHADWEEP EXP", departureTime: "05:40", arrivalTime: "10:25", travelTime: "50h 45m" }
         ]);
@@ -140,9 +143,15 @@ app.get('/api/trains/between/:from/:to', async (req, res) => {
 app.get('/api/trains/coach/:trainNo', async (req, res) => {
     const { trainNo } = req.params;
 
+    // Save search log to MongoDB
+    if (mongoose.connection.readyState === 1) {
+        SearchHistory.create({ queryType: 'COACH', searchQuery: trainNo })
+            .catch(err => console.error('Error logging to MongoDB:', err.message));
+    }
+
     try {
         const response = await axios.get(
-            `https://${RAPIDAPI_HOST}/coach-position/${trainNo}`,
+            `https://${RAPIDAPI_HOST}/coach-position/${encodeURIComponent(trainNo)}`,
             {
                 headers: {
                     'x-rapidapi-key': RAPIDAPI_KEY,
@@ -161,6 +170,39 @@ app.get('/api/trains/coach/:trainNo', async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to fetch coach position"
+        });
+    }
+});
+
+// PNR Status (RapidAPI returns { success, message } for invalid/flushed PNRs, or { success, data } for valid ones)
+app.get('/api/pnr/:pnr', async (req, res) => {
+    const { pnr } = req.params;
+
+    if (!/^\d{10}$/.test(pnr)) {
+        return res.status(400).json({ success: false, message: "PNR number must be exactly 10 digits" });
+    }
+
+    // Save search log to MongoDB (masked, since a PNR identifies a passenger booking)
+    if (mongoose.connection.readyState === 1) {
+        SearchHistory.create({ queryType: 'PNR', searchQuery: `${pnr.slice(0, 3)}XXXXX${pnr.slice(-2)}` })
+            .catch(err => console.error('Error logging to MongoDB:', err.message));
+    }
+
+    try {
+        const response = await axios.get(`https://${RAPIDAPI_HOST}/getPNRStatus/${pnr}`, {
+            headers: {
+                'x-rapidapi-key': RAPIDAPI_KEY,
+                'x-rapidapi-host': RAPIDAPI_HOST
+            }
+        });
+
+        res.json(response.data);
+    } catch (err) {
+        console.error("PNR Status API Error:", err.response?.data || err.message);
+
+        res.status(502).json({
+            success: false,
+            message: "PNR service is unavailable right now. Please try again later."
         });
     }
 });

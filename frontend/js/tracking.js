@@ -24,6 +24,10 @@ const delay = document.getElementById('delay');
 
 const scheduleContainer = document.getElementById('schedule-container');
 
+const dataSourceNote = document.getElementById('data-source-note');
+
+const coachLink = document.getElementById('coach-link');
+
 
 trackingForm.addEventListener('submit', async (event) => {
 
@@ -54,6 +58,14 @@ trackingForm.addEventListener('submit', async (event) => {
         const data = await response.json();
 
         displayTrainStatus(data, trainNumber);
+
+        dataSourceNote.classList.toggle(
+            'hidden',
+            response.headers.get('X-Data-Source') !== 'fallback'
+        );
+
+        coachLink.href =
+            `coach.html?train=${encodeURIComponent(trainNumber)}`;
 
     } catch (error) {
 
@@ -172,19 +184,19 @@ function displaySchedule(schedule) {
 
         row.innerHTML = `
             <div class="station-name">
-                ${stationName}
+                ${escapeHTML(stationName)}
             </div>
 
             <div class="station-time">
-                ${arrivalTime}
+                ${escapeHTML(arrivalTime)}
             </div>
 
             <div class="station-time">
-                ${departureTime}
+                ${escapeHTML(departureTime)}
             </div>
 
             <div class="station-status">
-                Platform ${platform}
+                Platform ${escapeHTML(platform)}
             </div>
         `;
 
@@ -202,5 +214,26 @@ function showError(message) {
     errorMessage.classList.remove('hidden');
 
     trainResult.classList.add('hidden');
+
+}
+
+
+function escapeHTML(value) {
+
+    return String(value).replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+
+}
+
+
+// Opened from the train list as tracking.html?train=12626 - search straight away
+const trainParam = new URLSearchParams(window.location.search).get('train');
+
+if (trainParam) {
+
+    trainNumberInput.value = trainParam;
+
+    trackingForm.requestSubmit();
 
 }

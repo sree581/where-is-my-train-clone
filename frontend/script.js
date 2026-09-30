@@ -149,7 +149,7 @@ function renderTrackingView(train) {
             <div class="top-bar-actions">
                 <button class="chip-btn">Yesterday ▾</button>
                 <button class="chip-btn">⏰ Alarm</button>
-                <button class="chip-btn">🚃 Coach</button>
+                <button class="chip-btn" onclick="location.href='coach.html?train=${encodeURIComponent(train.trainNumber)}'">🚃 Coach</button>
                 <button class="chip-btn">🔗 Share</button>
             </div>
         </div>

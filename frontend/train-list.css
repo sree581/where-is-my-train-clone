@@ -189,6 +189,21 @@ body {
     color: #8b2be2;
     font-weight: bold;
 }
+
+.train-links a {
+    color: #1a73e8;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.train-links a:hover {
+    text-decoration: underline;
+}
+
+.header h1 a {
+    color: inherit;
+    text-decoration: none;
+}
 .search-section {
     background-color: white;
     padding: 20px;

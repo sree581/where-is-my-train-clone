@@ -309,3 +309,23 @@ body {
         font-size: 26px;
     }
 }
+
+/* Sample-data notice and coach link (added during integration) */
+
+.data-source-note {
+    margin: 10px 0 0;
+    color: #b26a00;
+    font-size: 14px;
+}
+
+.coach-link {
+    display: inline-block;
+    margin-top: 16px;
+    color: #1a73e8;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.coach-link:hover {
+    text-decoration: underline;
+}

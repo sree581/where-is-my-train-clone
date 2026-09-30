@@ -1,14 +1,24 @@
 /**
  * Home Page — Where Is My Train Clone
- * Vanilla JS interactions with mock data for standalone demo.
- * Structured so that real API calls can replace mock functions later.
+ * Search Train opens train-list.html, PNR Status calls the backend,
+ * Coach Position opens coach.html. Station/train lists below are only
+ * used for autocomplete and name lookup.
  */
 
 (function () {
   'use strict';
 
-  /* ────────── Mock Data ────────── */
+  const API_BASE_URL = 'http://localhost:5000';
+
+  /* ────────── Autocomplete Data ────────── */
   const MOCK_STATIONS = [
+    { code: 'QLN', name: 'Kollam Junction' },
+    { code: 'ERS', name: 'Ernakulam Junction' },
+    { code: 'ERN', name: 'Ernakulam Town' },
+    { code: 'KTYM', name: 'Kottayam' },
+    { code: 'ALLP', name: 'Alappuzha' },
+    { code: 'TCR', name: 'Thrissur' },
+    { code: 'CLT', name: 'Kozhikode' },
     { code: 'NDLS', name: 'New Delhi' },
     { code: 'BCT', name: 'Mumbai Central' },
     { code: 'MAS', name: 'Chennai Central' },
@@ -61,6 +71,14 @@
         hideAllResults();
       });
     });
+
+    // Allow links like index.html#pnr-status to open a specific tab
+    const openTabFromHash = () => {
+      const hashTab = $(`.search-tab[data-tab="${location.hash.slice(1)}"]`);
+      if (hashTab) hashTab.click();
+    };
+    openTabFromHash();
+    window.addEventListener('hashchange', openTabFromHash);
   }
 
   /* ────────── Station Autocomplete ────────── */
@@ -148,23 +166,36 @@
     searchBtn.addEventListener('click', () => {
       const from = $('#from-station');
       const to = $('#to-station');
-      const resultsPanel = $('#find-trains-results');
 
-      if (!from.value.trim()) {
+      const fromCode = stationCodeFromInput(from);
+      const toCode = stationCodeFromInput(to);
+
+      if (!fromCode) {
         shakeInput(from);
         return;
       }
-      if (!to.value.trim()) {
+      if (!toCode) {
         shakeInput(to);
         return;
       }
 
-      // Mock search
-      const fromCode = from.dataset.stationCode || from.value.trim().toUpperCase();
-      const toCode = to.dataset.stationCode || to.value.trim().toUpperCase();
-      const results = mockSearchTrains(fromCode, toCode);
-      renderTrainResults(results, resultsPanel);
+      window.location.href =
+        `train-list.html?from=${encodeURIComponent(fromCode)}&to=${encodeURIComponent(toCode)}`;
     });
+  }
+
+  // Accepts a picked suggestion, "Name (CODE)", a bare code like "QLN", or a known station name
+  function stationCodeFromInput(input) {
+    const value = input.value.trim();
+    if (!value) return null;
+    if (input.dataset.stationCode && value.includes(`(${input.dataset.stationCode})`)) {
+      return input.dataset.stationCode;
+    }
+    const bracket = value.match(/\(([A-Za-z]{2,5})\)\s*$/);
+    if (bracket) return bracket[1].toUpperCase();
+    const byName = MOCK_STATIONS.find((s) => s.name.toLowerCase() === value.toLowerCase());
+    if (byName) return byName.code;
+    return /^[A-Za-z]{2,5}$/.test(value) ? value.toUpperCase() : null;
   }
 
   /* ────────── PNR Status Search ────────── */
@@ -172,69 +203,85 @@
     const pnrBtn = $('#pnr-search-btn');
     if (!pnrBtn) return;
 
-    pnrBtn.addEventListener('click', () => {
+    pnrBtn.addEventListener('click', async () => {
       const pnrInput = $('#pnr-input');
       const resultsPanel = $('#pnr-results');
       const val = pnrInput.value.trim();
 
-      if (!val || val.length < 10) {
+      if (!/^\d{10}$/.test(val)) {
         shakeInput(pnrInput);
+        showPNRMessage(resultsPanel, 'Please enter a valid 10-digit PNR number.');
         return;
       }
 
-      // Mock PNR result
-      renderPNRResult(val, resultsPanel);
+      showPNRMessage(resultsPanel, 'Checking PNR status…');
+      pnrBtn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/pnr/${val}`);
+        const result = await response.json();
+
+        if (!result.success) {
+          showPNRMessage(resultsPanel, result.message || 'PNR status not available.');
+          return;
+        }
+        renderPNRResult(val, result.data || {}, resultsPanel);
+      } catch (err) {
+        console.error('PNR search error:', err);
+        showPNRMessage(resultsPanel, 'Unable to reach the server. Please make sure the backend is running on port 5000.');
+      } finally {
+        pnrBtn.disabled = false;
+      }
     });
   }
 
-  /* ────────── Mock Search ────────── */
-  function mockSearchTrains(fromCode, toCode) {
-    // Return all trains or filter by matching from/to
-    return MOCK_TRAINS.filter((t) => {
-      const matchFrom = t.from === fromCode || fromCode.length < 3;
-      const matchTo = t.to === toCode || toCode.length < 3;
-      return matchFrom || matchTo;
-    }).slice(0, 5);
-  }
-
-  function renderTrainResults(trains, panel) {
+  function showPNRMessage(panel, message) {
     if (!panel) return;
-    if (trains.length === 0) {
-      panel.innerHTML = '<div class="no-results">No trains found for this route. Try different stations.</div>';
-    } else {
-      panel.innerHTML = trains
-        .map(
-          (t) =>
-            `<div class="result-card">
-              <h4>${t.number} — ${t.name}</h4>
-              <div class="route">
-                <span>${t.fromName}</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                <span>${t.toName}</span>
-              </div>
-              <p>Runs: ${t.days}</p>
-            </div>`
-        )
-        .join('');
-    }
+    panel.innerHTML = '';
+    const box = document.createElement('div');
+    box.className = 'no-results';
+    box.textContent = message;
+    panel.appendChild(box);
     panel.classList.add('visible');
   }
 
-  function renderPNRResult(pnr, panel) {
+  // The API's success payload isn't documented here, so read common field names defensively
+  function renderPNRResult(pnr, data, panel) {
     if (!panel) return;
+    const pick = (...keys) => keys.map((k) => data[k]).find((v) => v !== undefined && v !== null && v !== '');
+    const trainNo = pick('trainNumber', 'trainNo', 'train_number');
+    const trainName = pick('trainName', 'train_name');
+    const from = pick('boardingPoint', 'sourceStation', 'from', 'source');
+    const to = pick('destinationStation', 'reservationUpto', 'to', 'destination');
+    const date = pick('dateOfJourney', 'journeyDate', 'doj');
+    const chart = pick('chartStatus', 'chartPrepared');
+    const passengers = pick('passengerList', 'passengers') || [];
+
+    const passengerRows = (Array.isArray(passengers) ? passengers : [])
+      .map((p, i) => {
+        const booking = p.bookingStatusDetails || p.bookingStatus || '-';
+        const current = p.currentStatusDetails || p.currentStatus || '-';
+        return `<p>Passenger ${p.passengerSerialNumber || i + 1}: ${escapeHTML(booking)} → <strong>${escapeHTML(current)}</strong></p>`;
+      })
+      .join('');
+
     panel.innerHTML = `
       <div class="result-card">
         <h4>PNR: ${pnr}</h4>
-        <p>Train: 12301 — Rajdhani Express</p>
-        <div class="route">
-          <span>New Delhi</span>
+        ${trainNo || trainName ? `<p>Train: ${escapeHTML(trainNo || '')} — ${escapeHTML(trainName || '')}</p>` : ''}
+        ${from || to ? `<div class="route"><span>${escapeHTML(from || '-')}</span>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          <span>Howrah Junction</span>
-        </div>
-        <p style="margin-top:8px;color:#28A745;font-weight:600;">Status: Confirmed (S4 / 32)</p>
+          <span>${escapeHTML(to || '-')}</span></div>` : ''}
+        ${date ? `<p>Date of journey: ${escapeHTML(date)}</p>` : ''}
+        ${chart !== undefined ? `<p>Chart: ${escapeHTML(chart)}</p>` : ''}
+        ${passengerRows || '<p>No passenger details returned.</p>'}
       </div>
     `;
     panel.classList.add('visible');
+  }
+
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
   /* ────────── Utilities ────────── */
@@ -330,43 +377,53 @@
     document.head.appendChild(style);
   }
 
- /* ────────── Coach Position ────────── */
-function initCoachPosition() {
-  const trainInput = $('#coach-train-input');
-  const coachButton = $('#coach-position-btn');
+  /* ────────── Coach Position ────────── */
+  function initCoachPosition() {
+    const trainInput = $('#coach-train-input');
+    const coachButton = $('#coach-position-btn');
 
-  if (!trainInput || !coachButton) return;
+    if (!trainInput || !coachButton) return;
 
-  coachButton.addEventListener('click', () => {
-    const value = trainInput.value.trim();
+    coachButton.addEventListener('click', () => {
+      const value = trainInput.value.trim();
 
-    if (!value) {
-      shakeInput(trainInput);
-      return;
-    }
+      if (!value) {
+        shakeInput(trainInput);
+        return;
+      }
 
-    const searchValue = value.toLowerCase();
+      // Any 5-digit train number goes straight to the coach API; names are looked up locally
+      if (/^\d{5}$/.test(value)) {
+        window.location.href = `coach.html?train=${encodeURIComponent(value)}`;
+        return;
+      }
 
-    const train = MOCK_TRAINS.find(
-      (t) =>
-        t.number === value ||
-        t.name.toLowerCase() === searchValue
-    );
+      const searchValue = value.toLowerCase();
 
-    if (!train) {
-      alert('Train not found. Please enter a valid train number or train name.');
-      return;
-    }
+      const train = MOCK_TRAINS.find(
+        (t) => t.name.toLowerCase() === searchValue
+      );
 
-    const url =
-      `coach.html?trainNumber=${encodeURIComponent(train.number)}` +
-      `&trainName=${encodeURIComponent(train.name)}`;
+      if (!train) {
+        alert('Train not found. Please enter a 5-digit train number or a known train name.');
+        return;
+      }
 
-    window.location.href = url;
-  });
-}
+      window.location.href =
+        `coach.html?train=${encodeURIComponent(train.number)}` +
+        `&trainName=${encodeURIComponent(train.name)}`;
+    });
+
+    trainInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        coachButton.click();
+      }
+    });
+  }
+
   /* ────────── Init ────────── */
-    function init() {
+  function init() {
     injectShakeKeyframes();
     initTabs();
     initAutocomplete();

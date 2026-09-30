@@ -46,14 +46,40 @@
       </button>
     </div>
 
-    <!-- Search Train Form (Redirects to index-legacy.html) -->
+    <!-- Search Train Form (opens train-list.html?from=CODE&to=CODE) -->
     <div class="search-form active" id="find-trains-form" role="tabpanel" aria-labelledby="tab-find-trains">
-      <div class="redirect-action-container" style="text-align: center; padding: 20px 0;">
-        <a href="index-legacy.html" class="search-btn" id="find-trains-btn" style="display: inline-flex; text-decoration: none; align-items: center; justify-content: center; width: 100%; max-width: 320px; text-align: center;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right: 8px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Search Live Trains
-        </a>
+      <div class="station-inputs">
+        <div class="input-group">
+          <label for="from-station">From</label>
+          <div class="input-wrapper" style="position:relative">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="4 3"/></svg>
+            <input type="text" id="from-station" class="station-autocomplete" placeholder="Station name or code (e.g. QLN)" autocomplete="off" aria-label="Departure station">
+            <div class="autocomplete-dropdown" role="listbox"></div>
+          </div>
+        </div>
+
+        <button class="swap-btn" id="swap-stations" aria-label="Swap stations" title="Swap stations">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+        </button>
+
+        <div class="input-group">
+          <label for="to-station">To</label>
+          <div class="input-wrapper" style="position:relative">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" stroke-dasharray="4 3"/></svg>
+            <input type="text" id="to-station" class="station-autocomplete" placeholder="Station name or code (e.g. ERS)" autocomplete="off" aria-label="Destination station">
+            <div class="autocomplete-dropdown" role="listbox"></div>
+          </div>
+        </div>
+
+        <button class="search-btn" id="find-trains-btn" aria-label="Search trains">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Search
+        </button>
       </div>
+      <p style="text-align: center; margin-top: 12px; font-size: 0.9rem;">
+        Know your train number? <a href="tracking.html" style="color: #1a73e8; font-weight: 600;">Track live status</a>
+        &middot; <a href="index-legacy.html" style="color: #1a73e8; font-weight: 600;">Classic tracker</a>
+      </p>
     </div>
 
     <!-- PNR Status Form -->
@@ -238,10 +264,11 @@
         <div class="footer-col">
           <h4>Features</h4>
           <ul>
-            <li><a href="index-legacy.html">Live Train Status</a></li>
-            <li><a href="#">PNR Status</a></li>
+            <li><a href="tracking.html">Live Train Status</a></li>
+            <li><a href="#pnr-status">PNR Status</a></li>
             <li><a href="coach.html">Coach Position & Layout</a></li>
-            <li><a href="#">Train Route</a></li>
+            <li><a href="train-list.html">Trains Between Stations</a></li>
+            <li><a href="index-legacy.html">Classic Tracker</a></li>
           </ul>
         </div>
         <div class="footer-col">

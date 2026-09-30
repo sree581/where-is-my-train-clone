@@ -54,27 +54,33 @@ document.addEventListener("DOMContentLoaded", () => {
             return null;
         }
 
-        const bracketMatch = trimmed.match(/\(([A-Za-z0-9]+)\)\s*$/);
+        const bracketMatch = trimmed.match(/\(([A-Za-z]{2,5})\)\s*$/);
 
         if (bracketMatch) {
-            const code = bracketMatch[1].toUpperCase();
-            const known = STATIONS.find(station => station.code === code);
-            return known ? known.code : null;
-        }
-
-        const byCode = STATIONS.find(
-            station => station.code === trimmed.toUpperCase()
-        );
-
-        if (byCode) {
-            return byCode.code;
+            return bracketMatch[1].toUpperCase();
         }
 
         const byName = STATIONS.find(
             station => station.name.toLowerCase() === trimmed.toLowerCase()
         );
 
-        return byName ? byName.code : null;
+        if (byName) {
+            return byName.code;
+        }
+
+        // Any other station code (e.g. NDLS from the Home page) is passed to the backend as-is
+        return /^[A-Za-z]{2,5}$/.test(trimmed) ? trimmed.toUpperCase() : null;
+    }
+
+    function escapeHTML(value) {
+        return String(value).replace(/[&<>"']/g, c => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        }[c]));
+    }
+
+    function stationLabel(code) {
+        const known = STATIONS.find(station => station.code === code);
+        return known ? `${known.name} (${known.code})` : code;
     }
 
     function hideSuggestions(suggestionsBox) {
@@ -219,6 +225,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
             displayTrains(trains, from, to);
 
+            if (response.headers.get("X-Data-Source") === "fallback") {
+                trainList.insertAdjacentHTML("afterbegin", `
+                    <p style="text-align: center; color: #b26a00; padding: 8px;">
+                        Live train data is unavailable right now - showing sample trains.
+                    </p>
+                `);
+            }
+
+            history.replaceState(null, "", `?from=${from}&to=${to}`);
+
 
         } catch (error) {
 
@@ -266,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     <p>
                         No trains are available between
-                        ${from} and ${to}.
+                        ${escapeHTML(from)} and ${escapeHTML(to)}.
                     </p>
                 </div>
             `;
@@ -284,6 +300,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
             card.className = "train-card";
 
+            const trainNumber = escapeHTML(train.trainNumber || "N/A");
+            const trainName = escapeHTML(train.trainName || "Express");
+            const detailsQuery =
+                `train=${encodeURIComponent(train.trainNumber || "")}` +
+                `&trainName=${encodeURIComponent(train.trainName || "")}`;
+
 
             card.innerHTML = `
 
@@ -292,11 +314,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="train-title">
 
                         <span class="train-number">
-                            ${train.trainNumber || "N/A"}
+                            ${trainNumber}
                         </span>
 
                         <span class="train-name">
-                            ${train.trainName || "Express"}
+                            ${trainName}
                         </span>
 
                     </div>
@@ -309,7 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                 <div class="route">
-                    ${from} → ${to}
+                    ${escapeHTML(stationLabel(from))} → ${escapeHTML(stationLabel(to))}
                 </div>
 
 
@@ -318,11 +340,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="time departure">
 
                         <div class="time-value">
-                            ${train.departureTime || "N/A"}
+                            ${escapeHTML(train.departureTime || "N/A")}
                         </div>
 
                         <div class="station-code">
-                            ${from}
+                            ${escapeHTML(from)}
                         </div>
 
                     </div>
@@ -338,11 +360,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="time arrival">
 
                         <div class="time-value">
-                            ${train.arrivalTime || "N/A"}
+                            ${escapeHTML(train.arrivalTime || "N/A")}
                         </div>
 
                         <div class="station-code">
-                            ${to}
+                            ${escapeHTML(to)}
                         </div>
 
                     </div>
@@ -353,11 +375,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="train-footer">
 
                     <span class="running-days">
-                        📅 Daily
+                        ⏱ ${escapeHTML(train.travelTime || "N/A")}
                     </span>
 
-                    <span class="coach">
-                        ${train.travelTime || "N/A"}
+                    <span class="train-links">
+                        <a href="tracking.html?${detailsQuery}">Live Status</a>
+                        ·
+                        <a href="coach.html?${detailsQuery}">Coach Position</a>
                     </span>
 
                 </div>
@@ -431,9 +455,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             } else {
 
-                console.log("Track Train selected");
-
-                alert("Track Train feature will be connected next.");
+                window.location.href = "tracking.html";
 
             }
 
@@ -468,5 +490,23 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
     }
+
+
+
+    // =====================================================
+    // INITIAL SEARCH (train-list.html?from=QLN&to=ERS)
+    // =====================================================
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromParam = urlParams.get("from");
+    const toParam = urlParams.get("to");
+
+    if (fromParam && toParam) {
+        fromInput.value = stationLabel(fromParam.toUpperCase());
+        toInput.value = stationLabel(toParam.toUpperCase());
+    }
+
+    // Replace the static sample cards with backend results for the current route
+    searchTrains();
 
 });

@@ -32,7 +32,9 @@ Here is a list of every single toy in our software toolbox:
 | :--- | :--- |
 | **`index.html`** | The main home page of the website with the big blue header banner! 🏠 |
 | **`index-legacy.html`** | The classic version of the train tracker page! |
-| **`coach.html`** | The special page that shows train coaches and seat maps! 🚃 |
+| **`train-list.html`** | Shows all trains between two stations (`train-list.html?from=QLN&to=ERS`). 🚉 |
+| **`tracking.html`** | Live running status and schedule of one train (`tracking.html?train=12626`). 📍 |
+| **`coach.html`** | The special page that shows train coaches and seat maps (`coach.html?train=12626`)! 🚃 |
 | **`helpdesk.html`** | The helper page for answering common passenger questions! 🙋‍♂️ |
 | **`css/home.css`** | The main paint bucket! Gives the website nice fonts, spacing, and page layouts. 🎨 |
 | **`style.css`** | The extra styling sheet that controls header colors, timeline tracks, and night mode! 🖌️ |
@@ -45,10 +47,17 @@ Here is a list of every single toy in our software toolbox:
 You don't need any supercomputers or heavy installations to run this!
 
 1. **Download the project** to your computer.
-2. Find the file named **`index.html`**.
-3. **Double-click it!** It will open right in your web browser (like Google Chrome or Safari).
-4. Click on the top tabs to switch between **Search Train**, **PNR Status**, and **Coach Position**.
-5. Click the `?` icon on the top-right header anytime you want to visit the Help Desk! 🆘
+2. **Start the backend** (it talks to RapidAPI and MongoDB Atlas):
+   * Copy `backend/.env.example` to `backend/.env` and fill in your own keys (never commit `.env`!).
+   * In the `backend` folder run `npm install`, then `node server.js`.
+   * The server runs on `http://localhost:5000` with these routes:
+     `/api/trains/spot/:train`, `/api/trains/between/:from/:to`, `/api/trains/coach/:train`, `/api/pnr/:pnr`, `/api/history`.
+   * Coach position and PNR status come live from RapidAPI. Live running status and trains-between-stations
+     are not offered by the current RapidAPI plan, so those pages show clearly labelled sample data.
+3. Find the file named **`index.html`**.
+4. **Double-click it!** It will open right in your web browser (like Google Chrome or Safari).
+5. Click on the top tabs to switch between **Search Train**, **PNR Status**, and **Coach Position**.
+6. Click the `?` icon on the top-right header anytime you want to visit the Help Desk! 🆘
 
 ---
 

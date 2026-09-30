@@ -1,16 +1,40 @@
-// Get train details from URL
+// Get train details from URL (coach.html?train=12626, or ?trainNumber=12626&trainName=...)
 const params = new URLSearchParams(window.location.search);
 
-const trainNumber = params.get("trainNumber");
+const trainNumber = params.get("train") || params.get("trainNumber");
 const trainName = params.get("trainName");
 
 const trainTitle = document.getElementById("train-title");
 
 if (trainNumber && trainName) {
     trainTitle.textContent = `${trainNumber} - ${trainName}`;
+} else if (trainNumber) {
+    trainTitle.textContent = `Train ${trainNumber}`;
 } else {
     trainTitle.textContent = "Train details unavailable";
 }
+
+// Sample rake shown when no train is given or the coach API can't be reached
+const SAMPLE_COACHES = [
+    { name: "GEN", type: "General", layout: "general" },
+    { name: "GEN", type: "General", layout: "general" },
+    { name: "A1", type: "AC 2-Tier", layout: "ac2" },
+    { name: "B1", type: "AC 3-Tier", layout: "ac3" },
+    { name: "B2", type: "AC 3-Tier", layout: "ac3" },
+    { name: "B3", type: "AC 3-Tier", layout: "ac3" },
+    { name: "B4", type: "AC 3-Tier", layout: "ac3" },
+    { name: "B5", type: "AC 3-Tier", layout: "ac3" },
+    { name: "B6", type: "AC 3-Tier", layout: "ac3" },
+    { name: "S1", type: "Sleeper", layout: "sleeper" },
+    { name: "S2", type: "Sleeper", layout: "sleeper" },
+    { name: "S3", type: "Sleeper", layout: "sleeper" },
+    { name: "S4", type: "Sleeper", layout: "sleeper" },
+    { name: "S5", type: "Sleeper", layout: "sleeper" },
+    { name: "S6", type: "Sleeper", layout: "sleeper" },
+    { name: "S7", type: "Sleeper", layout: "sleeper" },
+    { name: "S8", type: "Sleeper", layout: "sleeper" },
+    { name: "S9", type: "Sleeper", layout: "sleeper" }
+].map((coach, index) => ({ ...coach, position: index + 1 }));
 
 let coaches = [];
 let selected = 0;
@@ -351,9 +375,20 @@ function createSideBerth(number, type) {
     `;
 }
 
+function showSampleCoaches(reason) {
+    coaches = SAMPLE_COACHES;
+    selected = 3;
+
+    trainTitle.textContent += ` (${reason} - showing sample coach layout)`;
+
+    updateHeader();
+    renderSelector();
+    renderLayout();
+}
+
 async function loadCoachData() {
     if (!trainNumber) {
-        trainTitle.textContent = "Train number unavailable";
+        showSampleCoaches("no train selected");
         return;
     }
 
@@ -413,13 +448,7 @@ async function loadCoachData() {
     } catch (error) {
         console.error("Coach API Error:", error);
 
-        coachTitle.textContent = "Unable to load coach data";
-
-        document.getElementById("coach-layout").innerHTML = `
-            <div class="general-compartment">
-                Unable to load coach information.
-            </div>
-        `;
+        showSampleCoaches("live coach position unavailable");
     }
 }
 

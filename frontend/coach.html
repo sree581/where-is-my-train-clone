@@ -12,7 +12,7 @@
 <div class="page">
 
     <header class="header">
-        <button class="back-btn" onclick="history.back()">←</button>
+        <button class="back-btn" onclick="history.length > 1 ? history.back() : (location.href = 'index.html')">←</button>
 
         <div>
             <h1 id="coach-title"></h1>
