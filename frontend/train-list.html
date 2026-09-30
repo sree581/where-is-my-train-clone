@@ -72,13 +72,16 @@
 
                 <input
                     type="text"
+                    id="fromInput"
                     value="Kollam Jn (QLN)"
-                    readonly
+                    autocomplete="off"
                 >
 
                 <span class="clear">×</span>
 
             </div>
+
+            <div class="suggestions" id="fromSuggestions"></div>
 
         </div>
 
@@ -107,13 +110,16 @@
 
                 <input
                     type="text"
+                    id="toInput"
                     value="Ernakulam Jn (ERS)"
-                    readonly
+                    autocomplete="off"
                 >
 
                 <span class="clear">×</span>
 
             </div>
+
+            <div class="suggestions" id="toSuggestions"></div>
 
         </div>
 
@@ -1674,7 +1680,7 @@
 
 </div>
 
-
+<script src="train-list.js"></script>
 </body>
 
 </html>
