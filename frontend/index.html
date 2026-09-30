@@ -74,15 +74,30 @@
       <div class="search-results-panel" id="pnr-results" aria-live="polite"></div>
     </div>
 
-    <!-- Coach Position Form (Redirects to coach.html) -->
-    <div class="search-form" id="coach-position-form" role="tabpanel" aria-labelledby="tab-coach-position">
-      <div class="redirect-action-container" style="text-align: center; padding: 20px 0;">
-        <a href="coach.html" class="search-btn" id="coach-position-btn" style="display: inline-flex; text-decoration: none; align-items: center; justify-content: center; width: 100%; max-width: 320px; text-align: center;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right: 8px;"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/></svg>
-          View Coach & Seat Layout
-        </a>
+<!-- Coach Position Form -->
+<div class="search-form" id="coach-position-form" role="tabpanel" aria-labelledby="tab-coach-position">
+
+  <div class="pnr-input-row">
+
+    <div class="input-group">
+      <label for="coach-train-input">Train Number or Train Name</label>
+      <div class="input-wrapper">
+        <input
+          type="text"
+          id="coach-train-input"
+          placeholder="Eg: 12625 or Kerala Express"
+          aria-label="Train number or train name"
+        >
       </div>
     </div>
+
+    <button class="search-btn" id="coach-position-btn" type="button">
+      View Coach & Seat Layout
+    </button>
+
+  </div>
+
+</div>
   </section>
 
   <!-- Page Content -->
