@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    const API_BASE_URL = "http://localhost:5000";
+    const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || "http://localhost:5000";
 
     // Station dataset used for autocomplete (frontend-only for now)
     const STATIONS = [
@@ -15,7 +15,12 @@ document.addEventListener("DOMContentLoaded", () => {
         { name: "Kannur", code: "CAN" },
         { name: "Mangaluru Central", code: "MAQ" },
         { name: "Palakkad Jn", code: "PGT" },
-        { name: "Shoranur Jn", code: "SRR" }
+        { name: "Shoranur Jn", code: "SRR" },
+        { name: "Kayamkulam Jn", code: "KYJ" },
+        { name: "Chengannur", code: "CNGR" },
+        { name: "Aluva", code: "AWY" },
+        { name: "Coimbatore Jn", code: "CBE" },
+        { name: "New Delhi", code: "NDLS" }
     ];
 
     // Elements
@@ -225,10 +230,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             displayTrains(trains, from, to);
 
-            if (response.headers.get("X-Data-Source") === "fallback") {
+            // The backend's X-Data-Source header says where the data came from
+            const dataSourceNotes = {
+                database: "Live train data is unavailable right now - showing saved timetables from our database.",
+                fallback: "Live train data is unavailable right now - showing sample trains."
+            };
+            const note = dataSourceNotes[response.headers.get("X-Data-Source")];
+
+            if (note) {
                 trainList.insertAdjacentHTML("afterbegin", `
                     <p style="text-align: center; color: #b26a00; padding: 8px;">
-                        Live train data is unavailable right now - showing sample trains.
+                        ${note}
                     </p>
                 `);
             }
@@ -375,7 +387,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="train-footer">
 
                     <span class="running-days">
-                        ⏱ ${escapeHTML(train.travelTime || "N/A")}
+                        ${Array.isArray(train.runsOn) && train.runsOn.length
+                            ? `📅 ${escapeHTML(train.runsOn.join(", "))} · `
+                            : ""}⏱ ${escapeHTML(train.travelTime || "N/A")}
                     </span>
 
                     <span class="train-links">

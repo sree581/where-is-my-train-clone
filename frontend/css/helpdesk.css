@@ -372,3 +372,112 @@
   .help-title-section h1 { font-size: 1.15rem; }
   .help-search-box { height: 42px; padding: 0 14px; }
 }
+
+/* ===== Help topic / feedback dialog ===== */
+.hd-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(33, 37, 41, 0.55);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 400;
+}
+
+.hd-modal.open { display: flex; }
+
+.hd-modal-box {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.hd-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.hd-modal-header h2 {
+  font-size: 1.1rem;
+  color: var(--gray-800);
+  margin: 0;
+}
+
+.hd-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--gray-500);
+  cursor: pointer;
+}
+
+.hd-modal-close:hover { color: var(--gray-800); }
+
+.hd-modal-body {
+  padding: 18px 22px 22px;
+  color: var(--gray-700);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.hd-modal-body p { margin: 0 0 10px; }
+.hd-modal-body ul { margin: 0 0 10px 18px; }
+.hd-modal-body a { color: var(--primary); font-weight: 600; }
+
+.hd-form { display: flex; flex-direction: column; gap: 6px; }
+
+.hd-form label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-top: 6px;
+}
+
+.hd-optional { font-weight: 400; color: var(--gray-500); }
+
+.hd-form input,
+.hd-form select,
+.hd-form textarea {
+  font: inherit;
+  padding: 9px 12px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+}
+
+.hd-form input:focus,
+.hd-form select:focus,
+.hd-form textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.hd-form textarea { resize: vertical; }
+
+.hd-form-status { min-height: 1.2em; margin: 6px 0 0; font-size: 0.85rem; }
+.hd-form-status.ok { color: var(--success); }
+.hd-form-status.error { color: #DC3545; }
+
+.hd-submit {
+  margin-top: 6px;
+  padding: 11px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--primary);
+  color: var(--white);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hd-submit:hover { background: var(--primary-dark); }
+.hd-submit:disabled { opacity: 0.6; cursor: wait; }

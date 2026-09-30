@@ -8,7 +8,7 @@
 (function () {
   'use strict';
 
-  const API_BASE_URL = 'http://localhost:5000';
+  const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:5000';
 
   /* ────────── Autocomplete Data ────────── */
   const MOCK_STATIONS = [
@@ -19,6 +19,13 @@
     { code: 'ALLP', name: 'Alappuzha' },
     { code: 'TCR', name: 'Thrissur' },
     { code: 'CLT', name: 'Kozhikode' },
+    { code: 'KYJ', name: 'Kayamkulam Junction' },
+    { code: 'CNGR', name: 'Chengannur' },
+    { code: 'AWY', name: 'Aluva' },
+    { code: 'SRR', name: 'Shoranur Junction' },
+    { code: 'PGT', name: 'Palakkad Junction' },
+    { code: 'CAN', name: 'Kannur' },
+    { code: 'MAQ', name: 'Mangaluru Central' },
     { code: 'NDLS', name: 'New Delhi' },
     { code: 'BCT', name: 'Mumbai Central' },
     { code: 'MAS', name: 'Chennai Central' },

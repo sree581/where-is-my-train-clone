@@ -1,3 +1,5 @@
+const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || 'http://localhost:5000';
+
 const trackingForm = document.getElementById('tracking-form');
 
 const trainNumberInput = document.getElementById('train-number');
@@ -48,7 +50,7 @@ trackingForm.addEventListener('submit', async (event) => {
     try {
 
         const response = await fetch(
-            `http://localhost:5000/api/trains/spot/${encodeURIComponent(trainNumber)}`
+            `${API_BASE_URL}/api/trains/spot/${encodeURIComponent(trainNumber)}`
         );
 
         if (!response.ok) {
@@ -59,10 +61,7 @@ trackingForm.addEventListener('submit', async (event) => {
 
         displayTrainStatus(data, trainNumber);
 
-        dataSourceNote.classList.toggle(
-            'hidden',
-            response.headers.get('X-Data-Source') !== 'fallback'
-        );
+        showDataSourceNote(response.headers.get('X-Data-Source'));
 
         coachLink.href =
             `coach.html?train=${encodeURIComponent(trainNumber)}`;
@@ -214,6 +213,21 @@ function showError(message) {
     errorMessage.classList.remove('hidden');
 
     trainResult.classList.add('hidden');
+
+}
+
+
+// The backend's X-Data-Source header says where the data came from
+function showDataSourceNote(source) {
+
+    const notes = {
+        database: 'Live running status is unavailable right now - showing the saved timetable from our database.',
+        fallback: 'Live running status is unavailable right now - showing sample data.'
+    };
+
+    dataSourceNote.textContent = notes[source] || '';
+
+    dataSourceNote.classList.toggle('hidden', !notes[source]);
 
 }
 

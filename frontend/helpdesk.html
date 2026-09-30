@@ -285,6 +285,18 @@
     </nav>
   </div>
 
+  <!-- Help topic answers and the feedback form open in this dialog (filled by js/helpdesk.js) -->
+  <div class="hd-modal" id="helpdesk-modal" role="dialog" aria-modal="true" aria-labelledby="helpdesk-modal-title" aria-hidden="true">
+    <div class="hd-modal-box">
+      <div class="hd-modal-header">
+        <h2 id="helpdesk-modal-title"></h2>
+        <button type="button" class="hd-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="hd-modal-body" id="helpdesk-modal-body"></div>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
   <script src="js/helpdesk.js"></script>
 </body>
 </html>

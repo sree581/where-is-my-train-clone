@@ -42,7 +42,7 @@ let selected = 0;
 const coachList = document.getElementById("coach-list");
 const coachTitle = document.getElementById("coach-title");
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = window.APP_CONFIG?.API_BASE_URL || "http://localhost:5000";
 
 
 function renderSelector() {
